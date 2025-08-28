@@ -92,6 +92,7 @@
     <tbody>
       {% for p in planos_trabalho_lista %}
       <tr>
+
         <th scope="row"><p align = "center"> 
           {#
           <a class="card-title" href="{{url_for('trabalhos.ver_pt',ptId=p.planoTrabalhoId)}}">
@@ -136,7 +137,9 @@
           Não há
         {% endif%}
       </p></td>
-      </tr>
+
+    </tr>
+
       {% endfor %}
     </tbody>
 

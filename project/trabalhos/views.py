@@ -74,7 +74,7 @@ def lista_pts(lista):
                               .join(avaliacoes, avaliacoes.plano_trabalho_consolidacao_id == planos_trabalhos_consolidacoes.id)\
                               .filter(avaliacoes.data_avaliacao <= hoje)\
                               .group_by(planos_trabalhos_consolidacoes.plano_trabalho_id)\
-                              .subquery()                                                                                                                           
+                              .subquery()                                                                                                                            
     
     if lista == 'Todos':
         lista = '%'
