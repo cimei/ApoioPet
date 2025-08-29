@@ -59,6 +59,15 @@
     %}
       {% include "card_menu.html" %}
     {% endwith %}
+
+    {% with 
+      icon="fa-calendar-check", 
+      title= data_ref.strftime('%d/%m/%Y') + " ("+dias_data_ref+" dias atrás)",
+      description="Data a partir da qual os dados são recuperados de forma a evitar excesso de informação nas telas.",
+      link=url_for('core.data_referencia')
+    %}
+      {% include "card_menu.html" %}
+    {% endwith %}
     
   </div>
 </div>

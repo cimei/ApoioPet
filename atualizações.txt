@@ -1,5 +1,12 @@
 ## Atualizações ##
 
+29/08/2025
+
+Requerida a informação da quantidade de dias para se definir uma data de referência para o
+resgate dos dados. É definida como uma varíavel de ambiente no compose, mas pode ser alterada
+na tela inicial do sistema.
+v1.0.6
+
 28/08/2025
 
 Correção na string de conexão com o banco de dados: Faltava explicitar a porta.

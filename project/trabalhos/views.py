@@ -17,6 +17,7 @@ from sqlalchemy import func, case, literal_column
 from sqlalchemy.sql import label
 from sqlalchemy.orm import aliased
 from project import db, app
+from project.core.views import data_ref
 from project.models import Unidades, Pessoas, planos_trabalhos, planos_trabalhos_consolidacoes, planos_trabalhos_entregas, atividades,\
                            avaliacoes, tipos_modalidades, planos_entregas_entregas
 
@@ -60,6 +61,8 @@ def lista_pts(lista):
     
     hoje = dt.today()
 
+    dias = os.environ.get('DIAS_DATA_REF')
+
 
     #subquery que conta trabalhos em cada plano de trabalho 
     trabalhos = db.session.query(atividades.plano_trabalho_id,
@@ -94,7 +97,8 @@ def lista_pts(lista):
                                             trabalhos.c.qtd_trabalhos,
                                             avaliacoes_pt.c.qtd_aval)\
                                     .filter(planos_trabalhos.deleted_at == None,
-                                            planos_trabalhos.status.like(lista))\
+                                            planos_trabalhos.status.like(lista),
+                                            planos_trabalhos.data_inicio >= data_ref(dias))\
                                     .join(Pessoas, Pessoas.id == planos_trabalhos.usuario_id)\
                                     .join(Unidades, Unidades.id == planos_trabalhos.unidade_id)\
                                     .join(tipos_modalidades, tipos_modalidades.id == planos_trabalhos.tipo_modalidade_id)\
@@ -103,7 +107,10 @@ def lista_pts(lista):
                                     .outerjoin(avaliacoes_pt, avaliacoes_pt.c.plano_trabalho_id == planos_trabalhos.id)\
                                     .all()
 
-    quantidade = len(planos_trabalho_lista)                         
+    quantidade = len(planos_trabalho_lista) 
+
+    qtd_pts_total =  db.session.query(planos_trabalhos.id).filter(planos_trabalhos.deleted_at == None).count()
+    
  
     form = CSV_Form()
 
@@ -127,8 +134,10 @@ def lista_pts(lista):
     
     return render_template ('lista_pts.html', planos_trabalho_lista = planos_trabalho_lista, 
                                               quantidade = quantidade,
+                                              qtd_pts_total = qtd_pts_total,
                                               lista = lista,
-                                              form = form)
+                                              form = form,
+                                              data_ref = data_ref(dias))
 
 
 

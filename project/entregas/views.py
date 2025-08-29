@@ -13,6 +13,7 @@ from sqlalchemy import func, case, literal_column, or_, distinct
 from sqlalchemy.sql import label
 from sqlalchemy.orm import aliased
 from project import db, app
+from project.core.views import data_ref
 from project.models import Unidades, Pessoas, programas, planos_entregas, unidades_integrantes,\
                            avaliacoes, planos_entregas_entregas, planos_trabalhos_entregas, tipos_modalidades, planos_trabalhos_consolidacoes,\
                            planos_trabalhos
@@ -38,6 +39,8 @@ def lista_pe():
     +---------------------------------------------------------------------------------------+
     """
         
+    dias = os.environ.get('DIAS_DATA_REF')    
+
     unid_dados = db.session.query(Unidades.id, Unidades.sigla, Unidades.path)\
                             .all()
 
@@ -83,12 +86,15 @@ def lista_pe():
                                 .outerjoin(entregas, entregas.c.plano_entrega_id == planos_entregas.id)\
                                 .outerjoin(planos_trab,planos_trab.c.pe_id == planos_entregas.id)\
                                 .outerjoin(avaliacoes,avaliacoes.plano_entrega_id == planos_entregas.id)\
-                                .filter(planos_entregas.deleted_at == None)\
+                                .filter(planos_entregas.deleted_at == None,
+                                        planos_entregas.data_inicio >= data_ref(dias))\
                                 .order_by(planos_entregas.status, Unidades.sigla, planos_entregas.data_inicio)\
                                 .all() 
                                
 
     quantidade = len(planos_entregas_todos)
+
+    qtd_pes_total =  db.session.query(planos_entregas.id).filter(planos_entregas.deleted_at == None).count()
 
     form = CSV_Form()
 
@@ -113,7 +119,9 @@ def lista_pe():
     return render_template('lista_pe.html', unid_dados = unid_dados,
                                             planos_entregas_todos = planos_entregas_todos,
                                             quantidade = quantidade,
-                                            form = form)
+                                            qtd_pes_total = qtd_pes_total,
+                                            form = form,
+                                            data_ref = data_ref(dias))
 
 
 ## consulta entregas de um plano de entregas

@@ -13,15 +13,16 @@ from sqlalchemy import cast, Date
 from sqlalchemy.sql import label
 from sqlalchemy.orm import aliased
 from project import db, app
+from project.core.views import data_ref
 from project.models import Pessoas, planos_entregas,\
                            planos_trabalhos, envio_itens
 from project.envios.forms import CSV_Form
 
-from datetime import datetime as dt
+from datetime import datetime as dt, timedelta
 
 import csv, os
 
-envios = Blueprint("envios",__name__,template_folder='templates')    
+envios = Blueprint("envios",__name__,template_folder='templates')  
 
 
 ## envios não realizados
@@ -38,6 +39,7 @@ def envios_insucesso():
 
     return render_template('envio.html')
 
+
 @envios.route('/envios_insucesso_pe',methods=['GET','POST'])
 @login_required
 def envios_insucesso_pe():
@@ -50,6 +52,8 @@ def envios_insucesso_pe():
 
     tipo = 'pe'
 
+    dias = os.environ.get('DIAS_DATA_REF')
+
     envios_sem_sucesso = db.session.query(envio_itens.id,
                                           envio_itens.tipo,
                                           envio_itens.uid,
@@ -60,13 +64,19 @@ def envios_insucesso_pe():
                                           planos_entregas.status)\
                             .outerjoin(planos_entregas, planos_entregas.id == envio_itens.uid)\
                             .filter(envio_itens.sucesso == 0,
-                                    envio_itens.tipo == 'entrega')\
+                                    envio_itens.tipo == 'entrega',
+                                    envio_itens.created_at >= data_ref(dias))\
                             .order_by(envio_itens.created_at.cast(Date).desc(),
                                       planos_entregas.nome)\
                             .all() 
                                           
 
     quantidade = len(envios_sem_sucesso)
+
+    qtd_envios_sem_sucesso_total = db.session.query(envio_itens.id)\
+                                             .filter(envio_itens.sucesso == 0,
+                                                     envio_itens.tipo == 'entrega')\
+                                             .count()
 
     form = CSV_Form()
 
@@ -92,8 +102,10 @@ def envios_insucesso_pe():
     return render_template('lista_envios_sem_sucesso.html', 
                                             envios_sem_sucesso = envios_sem_sucesso,
                                             quantidade = quantidade,
+                                            qtd_envios_sem_sucesso_total = qtd_envios_sem_sucesso_total,
                                             tipo = tipo,
-                                            form = form)
+                                            form = form,
+                                            data_ref = data_ref(dias))
 
 @envios.route('/envios_insucesso_pt',methods=['GET','POST'])
 @login_required
@@ -105,7 +117,9 @@ def envios_insucesso_pt():
     +---------------------------------------------------------------------------------------+
     """    
 
-    tipo = 'pt'                
+    tipo = 'pt'       
+
+    dias = os.environ.get('DIAS_DATA_REF')         
                                                                                                            
     donos_pts = aliased(Pessoas)                                                                          
         
@@ -121,13 +135,19 @@ def envios_insucesso_pt():
                             .outerjoin(planos_trabalhos, planos_trabalhos.id == envio_itens.uid)\
                             .outerjoin(donos_pts, donos_pts.id == planos_trabalhos.usuario_id)\
                             .filter(envio_itens.sucesso == 0,
-                                    envio_itens.tipo == 'trabalho')\
+                                    envio_itens.tipo == 'trabalho',
+                                    envio_itens.created_at >= data_ref(dias))\
                             .order_by(envio_itens.created_at.cast(Date).desc(),
                                       donos_pts.nome)\
                             .all() 
                                           
 
     quantidade = len(envios_sem_sucesso)
+
+    qtd_envios_sem_sucesso_total = db.session.query(envio_itens.id)\
+                                             .filter(envio_itens.sucesso == 0,
+                                                     envio_itens.tipo == 'trabalho')\
+                                             .count()
 
     form = CSV_Form()
 
@@ -153,8 +173,10 @@ def envios_insucesso_pt():
     return render_template('lista_envios_sem_sucesso.html', 
                                             envios_sem_sucesso = envios_sem_sucesso,
                                             quantidade = quantidade,
+                                            qtd_envios_sem_sucesso_total = qtd_envios_sem_sucesso_total,
                                             tipo = tipo,
-                                            form = form)
+                                            form = form,
+                                            data_ref = data_ref(dias))
 
 
 @envios.route('/envios_insucesso_par',methods=['GET','POST'])
@@ -167,7 +189,9 @@ def envios_insucesso_par():
     +---------------------------------------------------------------------------------------+
     """  
 
-    tipo = 'par'                  
+    tipo = 'par'  
+
+    dias = os.environ.get('DIAS_DATA_REF')                
                                                                                                                    
     envios_sem_sucesso = db.session.query(envio_itens.id,
                                           envio_itens.tipo,
@@ -179,12 +203,18 @@ def envios_insucesso_par():
                                           Pessoas.matricula)\
                             .outerjoin(Pessoas, Pessoas.id == envio_itens.uid)\
                             .filter(envio_itens.sucesso == 0,
-                                    envio_itens.tipo == 'participante')\
+                                    envio_itens.tipo == 'participante',
+                                    envio_itens.created_at >= data_ref(dias))\
                             .order_by(envio_itens.created_at.cast(Date).desc(),
                                       Pessoas.nome)\
                             .all() 
                                           
     quantidade = len(envios_sem_sucesso)
+
+    qtd_envios_sem_sucesso_total = db.session.query(envio_itens.id)\
+                                             .filter(envio_itens.sucesso == 0,
+                                                     envio_itens.tipo == 'participante')\
+                                             .count()
 
     form = CSV_Form()
 
@@ -209,7 +239,9 @@ def envios_insucesso_par():
     return render_template('lista_envios_sem_sucesso.html', 
                                             envios_sem_sucesso = envios_sem_sucesso,
                                             quantidade = quantidade,
+                                            qtd_envios_sem_sucesso_total = qtd_envios_sem_sucesso_total,
                                             tipo = tipo,
-                                            form = form)
+                                            form = form,
+                                            data_ref = data_ref(dias))
 
 
