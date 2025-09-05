@@ -128,17 +128,6 @@ def numeros():
                                  .outerjoin(planos_entregas, planos_entregas.id == avaliacoes.plano_entrega_id)\
                                  .filter(avaliacoes.plano_entrega_id != None)\
                                  .all()
-    
-    # sum_dif_datas = 0
-    # n = 0
-    # for a in avaliacoes_dados:
-    #     if a.dif_datas > 0:
-    #         sum_dif_datas += a.dif_datas
-    #         n += 1
-    # if n != 0:
-    #     mda = sum_dif_datas/n
-    # else:
-    #     mda = 0
   
     dados = [ a.dif_datas for a in avaliacoes_dados if a.dif_datas != None and a.dif_datas > 0 ]
     n = len(dados)
@@ -179,17 +168,6 @@ def numeros():
                               .join(avaliacoes, avaliacoes.plano_trabalho_consolidacao_id == planos_trabalhos_consolidacoes.id)\
                               .order_by(planos_trabalhos_consolidacoes.plano_trabalho_id)\
                               .all()
-    
-    # sum_dif_datas_pts = 0
-    # n = 0
-    # for a in avaliacoes_pt:
-    #     if a.dif_datas != None and a.dif_datas > 0:
-    #         sum_dif_datas_pts += a.dif_datas
-    #         n += 1
-    # if n != 0:
-    #     mda_pts = sum_dif_datas_pts/n
-    # else:
-    #     mda_pts = 0
 
     dados = [ a.dif_datas for a in avaliacoes_pt if a.dif_datas != None and a.dif_datas > 0 ]
     n = len(dados)
@@ -201,6 +179,81 @@ def numeros():
                                            qtd_pts = qtd_pts, 
                                            mda_pts = media, des_pts = desvio_padrao,
                                            qtd_pts_aval = qtd_pts_aval)
+
+@core.route('/graficos')
+def graficos():
+    """
+    +---------------------------------------------------------------------------------------+
+    |Gráficos para uma visão geral do PGD.                                                  |
+    +---------------------------------------------------------------------------------------+
+    """
+
+    hoje = dt.now()
+
+    qtd_pes =  db.session.query(label('pes_total',func.count(planos_entregas.id)),
+                                label('pes_ativ',func.count(case((planos_entregas.status == 'ATIVO',planos_entregas.id)))),
+                                label('pes_ativ_venc',func.count(case((and_(planos_entregas.status == 'ATIVO', planos_entregas.data_fim > hoje),planos_entregas.id)))),
+                                label('pes_incl',func.count(case((planos_entregas.status == 'INCLUIDO',planos_entregas.id)))),
+                                label('pes_incl_venc',func.count(case((and_(planos_entregas.status == 'INCLUIDO', planos_entregas.data_fim > hoje),planos_entregas.id)))),
+                                label('pes_homo',func.count(case((planos_entregas.status == 'HOMOLOGANDO',planos_entregas.id)))),
+                                label('pes_homo_venc',func.count(case((and_(planos_entregas.status == 'HOMOLOGANDO', planos_entregas.data_fim > hoje),planos_entregas.id)))),
+                                label('pes_conc',func.count(case((planos_entregas.status == 'CONCLUIDO',planos_entregas.id)))),
+                                label('pes_aval',func.count(case((planos_entregas.status == 'AVALIADO',planos_entregas.id)))),
+                                label('pes_canc',func.count(case((planos_entregas.status == 'CANCELADO',planos_entregas.id)))),
+                                label('pes_susp',func.count(case((planos_entregas.status == 'SUSPENSO',planos_entregas.id)))))\
+                          .filter(planos_entregas.deleted_at == None)\
+                          .all()
+
+    rotulos_pes = ['Ativos', 'Incluídos', 'Homologando', 'Concluídos', 'Avaliados', 'Cancelados', 'Suspensos']
+    valores_pes = [qtd_pes[0].pes_ativ, qtd_pes[0].pes_incl, qtd_pes[0].pes_homo, qtd_pes[0].pes_conc, qtd_pes[0].pes_aval, qtd_pes[0].pes_canc, qtd_pes[0].pes_susp]
+    valores_pes_2 = [0,qtd_pes[0].pes_ativ_venc, 0, qtd_pes[0].pes_incl_venc, 0, qtd_pes[0].pes_homo_venc, 0, 0, 0, 0]
+
+    qtd_pts =  db.session.query(label('pts_total',func.count(planos_trabalhos.id)),
+                                label('pts_ativ',func.count(case((planos_trabalhos.status == 'ATIVO',planos_trabalhos.id)))),
+                                label('pts_ativ_venc',func.count(case((and_(planos_trabalhos.status == 'ATIVO', planos_trabalhos.data_fim > hoje),planos_trabalhos.id)))),
+                                label('pts_incl',func.count(case((planos_trabalhos.status == 'INCLUIDO',planos_trabalhos.id)))),
+                                label('pts_incl_venc',func.count(case((and_(planos_trabalhos.status == 'INCLUIDO', planos_trabalhos.data_fim > hoje),planos_trabalhos.id)))),
+                                label('pts_agas',func.count(case((planos_trabalhos.status == 'AGUARDANDO_ASSINATURA',planos_trabalhos.id)))),
+                                label('pts_agas_venc',func.count(case((and_(planos_trabalhos.status == 'AGUARDANDO_ASSINATURA', planos_trabalhos.data_fim > hoje),planos_trabalhos.id)))),
+                                label('pts_conc',func.count(case((planos_trabalhos.status == 'CONCLUIDO',planos_trabalhos.id)))),
+                                label('pts_aval',func.count(case((planos_trabalhos.status == 'AVALIADO',planos_trabalhos.id)))),
+                                label('pts_canc',func.count(case((planos_trabalhos.status == 'CANCELADO',planos_trabalhos.id)))),
+                                label('pts_susp',func.count(case((planos_trabalhos.status == 'SUSPENSO',planos_trabalhos.id)))))\
+                          .filter(planos_trabalhos.deleted_at == None)\
+                          .all()
+    
+    # Contando avaliaçaões em consolidaçoes de pts
+    pts_conclu = db.session.query(planos_trabalhos.id)\
+                           .filter(planos_trabalhos.status == 'CONCLUIDO')\
+                           .subquery()
+    avaliacoes_pt_consol = db.session.query(planos_trabalhos_consolidacoes.plano_trabalho_id)\
+                                     .join(pts_conclu, pts_conclu.c.id == planos_trabalhos_consolidacoes.plano_trabalho_id)\
+                                     .filter(planos_trabalhos_consolidacoes.status == 'AVALIADO',
+                                             planos_trabalhos_consolidacoes.deleted_at == None)\
+                                     .distinct().all()
+    qtd_pts_aval = len(avaliacoes_pt_consol)
+
+    rotulos_pts = ['Ativos', 'Incluídos', 'Aguardando Assinatura', 'Concluídos', 'Cancelados', 'Suspensos']
+    valores_pts = [qtd_pts[0].pts_ativ, qtd_pts[0].pts_incl, qtd_pts[0].pts_agas, qtd_pts[0].pts_conc, qtd_pts[0].pts_canc, qtd_pts[0].pts_susp]
+    valores_pts_2 = [0, qtd_pts[0].pts_ativ_venc, 0, qtd_pts[0].pts_incl_venc, 0, qtd_pts[0].pts_agas_venc, 0, qtd_pts[0].pts_conc - qtd_pts_aval, 0, 0]
+
+
+    return render_template('graficos.html', qtd_pes = qtd_pes[0][0],
+                                            rotulos_pes = rotulos_pes, valores_pes = valores_pes, valores_pes_2 = valores_pes_2,
+                                            qtd_pts = qtd_pts[0][0],
+                                            rotulos_pts = rotulos_pts, valores_pts = valores_pts, valores_pts_2 = valores_pts_2,
+                                            qtd_pts_aval = qtd_pts_aval)
+
+
+@core.route('/dados')
+def dados():
+    """
+    +---------------------------------------------------------------------------------------+
+    |Abre menu de dados agregados.                                                          |
+    +---------------------------------------------------------------------------------------+
+    """
+
+    return render_template('dados.html')
 
 @core.route('/v_a')
 def v_a():

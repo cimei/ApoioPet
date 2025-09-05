@@ -61,10 +61,10 @@
     {% endwith %}
 
     {% with 
-      icon="fa-percent", 
-      title= "Números",
-      description="Alguns números para monitoramento do PGD.",
-      link=url_for('core.numeros')
+      icon="fa-info-circle", 
+      title= "Dados Agregados",
+      description="Alguns dados para monitoramento do PGD.",
+      link=url_for('core.dados')
     %}
       {% include "card_menu.html" %}
     {% endwith %}

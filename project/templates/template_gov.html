@@ -5,6 +5,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  
   <title>ApoioPet</title>
   <!-- Fonte Rawline-->
   <link rel="stylesheet"
@@ -233,11 +234,15 @@
                     </div>
 
                     <div class="menu-folder"><a class="menu-item" href="javascript: void(0)"><span class="icon"><i
-                      class="fa fa-percent" aria-hidden="true"></i></span><span class="content">Números</span></a>
+                      class="fa fa-info-circle" aria-hidden="true"></i></span><span class="content">Dados Agregados</span></a>
                       <ul>
                         <li><a class="menu-item divider" href="{{url_for('core.numeros')}}"><span
-                            class="icon"><i class="fa fa-list" aria-hidden="true"></i></span><span
-                            class="content">Visualizar</span></a>
+                            class="icon"><i class="fa fa-percent" aria-hidden="true"></i></span><span
+                            class="content">Números</span></a>
+                        </li>
+                        <li><a class="menu-item divider" href="{{url_for('core.graficos')}}"><span
+                            class="icon"><i class="fa fa-bar-chart" aria-hidden="true"></i></span><span
+                            class="content">Graficos</span></a>
                         </li>     
                       </ul>
                     </div>
@@ -353,7 +358,7 @@
     <footer class="br-footer pt-3" id="footer">
       <div class="container-lg">
         <div class="info">
-          {% set ver = namespace(num = '1.0.7') %}
+          {% set ver = namespace(num = '1.0.8') %}
           <div class="text-down-01 text-medium pb-3">{{'DB_DATABASE'|verifica_serv_bd}} em
             {{'DB_SERVER'|verifica_serv_bd}} - v. {{ ver.num }} <small>cbt</small>
           </div>

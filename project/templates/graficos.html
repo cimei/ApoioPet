@@ -1,0 +1,133 @@
+{% extends "template_gov.html" %}
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="col mb-5">
+  <div class="br-breadcrumb">
+    <ul class="crumb-list">
+      <li class="crumb home"><a class="br-button circle" href="{{url_for('core.inicio')}}"><span class="sr-only">Página inicial</span><i class="fa fa-home"></i></a></li>
+      <li class="crumb"><i class="icon fa fa-chevron-right"></i><a href="{{url_for('core.dados')}}">Dados Agregados</a></li>
+      <li class="crumb" data-active="active"><i class="icon fa fa-chevron-right"></i><span>Gráficos</span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="container">
+  <div class="jumbotron">
+
+    
+
+    <div class="row">
+
+      <div class="col">
+
+          <div class="card card border-secondary">
+
+            <div class="card-header">
+              <h4> <span class="br-tag bg-secondary" title="">{{ qtd_pes }}</span> Planos de Entregas </h4>
+            </div>
+
+            <div class="card-body">
+
+              <div>
+                <canvas id="PEChart"></canvas>
+              </div>  
+              
+             <script>
+                const ctx = document.getElementById('PEChart');
+
+                new Chart(ctx, {
+                  type: 'bar',
+                  data: {
+                    labels: {{ rotulos_pes | safe }},
+                    datasets: [
+                      {
+                      label: 'Planos de Entregas',
+                      data: {{ valores_pes | safe }},
+                      borderWidth: 1
+                      },
+                      {
+                      label: 'Vencidos',
+                      data: {{ valores_pes_2 | safe }},
+                      borderWidth: 1
+                      }
+                    ]
+                  },
+                  options: {
+                    scales: {
+                      y: {
+                        beginAtZero: true
+                      }
+                    }
+                  }
+                });
+              </script>   
+            
+            </div> 
+
+          </div>   
+        
+
+      </div>
+
+      <div class="col">
+
+          <div class="card card border-secondary">
+            
+            <div class="card-header">
+              <h4> <span class="br-tag bg-secondary" title="">{{ qtd_pts }} </span> Planos de Trabalho </h4>
+            </div>
+
+            <div class="card-body">
+              
+              <div>
+                <canvas id="PTChart"></canvas>
+              </div>  
+              
+             <script>
+                const ctx2 = document.getElementById('PTChart');
+
+                new Chart(ctx2, {
+                  type: 'bar',
+                  data: {
+                    labels: {{ rotulos_pts | safe }},
+                    datasets: [
+                      {
+                      label: 'Planos de Trabalho',
+                      data: {{ valores_pts | safe }},
+                      borderWidth: 1
+                      },
+                      {
+                      label: 'Vencidos/Não Avaliados',
+                      data: {{ valores_pts_2 | safe }},
+                      borderWidth: 1
+                      }
+                    ]
+                  },
+                  options: {
+                    scales: {
+                      y: {
+                        beginAtZero: true
+                      }
+                    }
+                  }
+                });
+              </script>   
+            
+            
+            </div> 
+
+          </div>  
+
+      </div>
+
+    </div>
+   
+    <p></p>
+
+  </div>
+</div>
+
+{% endblock %}

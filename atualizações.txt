@@ -2,6 +2,9 @@
 
 05/09/2025
 
+Inclusão de gráficos. Números e Gráficos ficam então sob o menu de Dados Agregados.
+v1.0.8
+
 Inclusão de tela com alguns números sobre o PGD para monitoramento.
 v1.0.7
 
