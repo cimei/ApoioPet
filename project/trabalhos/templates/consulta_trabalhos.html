@@ -56,7 +56,7 @@
             {% else %}
               <span class="text-dark">{{t.status}}</span>
             {% endif %} </p></td>
-          <td><p align = "center"> {{t.progresso|decimal_com_virgula}} </p></td>
+          <td><p align = "center"> {{t.progresso|decimal_com_virgula(1)}} </p></td>
           <td><p align = "center"> {{t.data_inicio.strftime('%d/%m/%Y')}} </p></td>
           <td><p align = "center"> {{t.data_entrega.strftime('%d/%m/%Y')}} </p></td>
         </tr>

@@ -84,28 +84,43 @@
               {% else %}
                 {{ p.sigla }}
               {% endif %}   
-              
-              {% if p.deleted_at %}
-                ({{p.deleted_at.strftime('%d/%m/%Y')}})
-              {% endif %}
-
           </p></td>
           <td><p align = "center">
-              {% if p.vencido == 's' and p.status == 'ATIVO' %} 
-                <span class="text-danger"><b>{{p.status}}</b></span>
-              {% elif p.status == 'INCLUIDO' %}
-                <span class="text-primary">{{p.status}}</span>
-              {% elif p.status == 'CONCLUIDO' %}
-                <span class="text-success">{{p.status}}</span>  
+              {% if p.status == 'INCLUIDO' %}
+                {% if p.vencido == 's' %}
+                  <span class="text-primary"><b>{{p.status}}</b></span>
+                {% else %}
+                  <span class="text-primary">{{p.status}}</span>
+                {% endif %}  
+              {% elif p.status == 'ATIVO' %}
+                {% if p.vencido == 's' %}
+                  <span class="text-danger"><b>{{p.status}}</b></span>
+                {% else %}
+                  <span class="text-success">{{p.status}}</span>
+                {% endif %}
               {% elif p.status == 'HOMOLOGANDO' %}
-                <span class="text-warning">{{p.status}}</span>  
+                {% if p.vencido == 's' %}
+                  <span class="text-warning"><b>{{p.status}}</b></span>
+                {% else %}
+                  <span class="text-warning">{{p.status}}</span>
+                {% endif %}
+              {% elif p.status == 'CANCELADO' %}
+                <span class="text-secondary">{{p.status}}</span>
+              {% elif p.status == 'AVALIADO' %}
+                <span class="text-info">{{p.status}}</span>  
               {% else %}
                 <span class="text-dark">{{p.status}}</span>
               {% endif %}
           
           </p></td>
           <td><p align = "center"> {{p.data_inicio.strftime('%d/%m/%Y')}} </p></td>
-          <td><p align = "center"> {{p.data_fim.strftime('%d/%m/%Y')}} </p></td>
+          <td><p align = "center"> 
+            {% if p.vencido == 's' and (p.status == 'ATIVO' or p.status == 'HOMOLOGANDO' or p.status == 'INCLUIDO') %}
+              <b>{{p.data_fim.strftime('%d/%m/%Y')}}</b>
+            {% else %}  
+              {{p.data_fim.strftime('%d/%m/%Y')}}
+            {% endif %}   
+          </p></td>
 
          <td><p align = "center"> 
                 {% if p.qtd_entregas == None %}
@@ -129,10 +144,11 @@
             </p>
           </td> 
           
-          {% if p.nota != None %}
+          {% if p.qtd_aval != None %}
             <td><p align = "center">
 
-              <a href="#" data-bs-toggle='modal' data-bs-target='#aval_modal{{planos_entregas_todos.index(p) + 1}}'><i class="fa-solid fa-check"></i></a></abbr>
+              <a href="#" data-bs-toggle='modal' data-bs-target='#aval_modal{{planos_entregas_todos.index(p) + 1}}' class="btn btn-outline-success btn-sm" role="button" aria-pressed="true">
+                    {{p.qtd_aval}} </a> 
               
                 {# modal visualização da avaliação do PE #}
                 <div class="modal fade" tabindex="-1" role="dialog" id="aval_modal{{planos_entregas_todos.index(p) + 1}}">
@@ -143,16 +159,32 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                       </div>
                       <div class="modal-body">
-                        <p>Data: <b>{{ p.data_avaliacao.strftime('%d/%m/%Y') }}</b></p>
-                        <p>Parecer: <b>{{ p.nota }}</b></p>
-                        <p>Justificativa: <b>{{ p.justificativa }}</b></p>
+
+                        <ul class="list-group">
+
+                          {% for a in avaliacoes_dados %}
+                          {% if p.id == a.plano_entrega_id%}
+                          <li class="list-group-item">
+                            <p>Data: <b>{{ a.data_avaliacao.strftime('%d/%m/%Y') }}</b></p>
+                            <p>Parecer: <b>{{ a.nota }}</b></p>
+                            {% if a.justificativa == None %}
+                              <p>Justificativa: <b>Não informada</b></p>
+                            {% else %}  
+                              <p>Justificativa: <b>{{ a.justificativa }}</b></p>
+                            {% endif %} 
+                            </li> 
+                          {% endif %}
+                          {% endfor %}
+
+                        </ul>
+                        
                       </div>
                       <div class="modal-footer">
                       </div>
                     </div>
                   </div>
                 </div>                      
-
+                
             </p></td>
             
           {% else %}
@@ -164,7 +196,7 @@
              
             </td>
             
-          {% endif%}
+          {% endif %}
               
         </tr>
 

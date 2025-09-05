@@ -132,7 +132,7 @@
               <span class="text-dark">{{p.status}}</span>
             {% endif %}
         </p></td>
-        <td><p align = "center"> {{p.carga_horaria|decimal_com_virgula}} ({{p.forma_contagem_carga_horaria}}) </p></td>  
+        <td><p align = "center"> {{p.carga_horaria|decimal_com_virgula(1)}} ({{p.forma_contagem_carga_horaria}}) </p></td>  
         <td><p align = "center"> 
           {% if p.qtd_trabalhos != None %}
             <a style="text-decoration: none" href="{{url_for('trabalhos.consulta_trabalhos',ptId=p.id)}}" class="btn btn-outline-success btn-sm" role="button" aria-pressed="true">

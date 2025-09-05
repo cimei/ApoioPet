@@ -9,7 +9,7 @@
 
 from flask import render_template, url_for, flash, redirect, Blueprint, send_from_directory
 from flask_login import current_user, login_required
-from sqlalchemy import func, case, literal_column, or_, distinct
+from sqlalchemy import func, case, literal_column, or_, distinct, text
 from sqlalchemy.sql import label
 from sqlalchemy.orm import aliased
 from project import db, app
@@ -57,7 +57,13 @@ def lista_pe():
     planos_trab = db.session.query(label('pe_id',pts_todos_1.c.plano_entrega_id.distinct()),
                                    label('qtd_planos_trab',func.count(distinct(pts_todos_1.c.pt_id))))\
                             .group_by(pts_todos_1.c.plano_entrega_id)\
-                            .subquery()                      
+                            .subquery()    
+
+    avaliacoes_pes = db.session.query(avaliacoes.plano_entrega_id,
+                                      label('qtd_aval',func.count(avaliacoes.id)))\
+                               .filter(avaliacoes.plano_entrega_id != None)\
+                               .group_by(avaliacoes.plano_entrega_id)\
+                               .subquery()
                                                                                       
                             
     unidades_pai = aliased(Unidades)                                                                          
@@ -77,15 +83,12 @@ def lista_pe():
                                        planos_entregas.unidade_id,
                                        Unidades.unidade_pai_id,
                                        label('vencido',case((planos_entregas.data_fim < hoje, literal_column("'s'")), else_=literal_column("'n'"))),
-                                       avaliacoes.nota,
-                                       avaliacoes.data_avaliacao,
-                                       label('just_avalia',avaliacoes.justificativas),
-                                       label('parecer_avalia',avaliacoes.justificativa))\
+                                       avaliacoes_pes.c.qtd_aval)\
                                 .join(Unidades, Unidades.id == planos_entregas.unidade_id)\
                                 .outerjoin(unidades_pai, unidades_pai.id == Unidades.unidade_pai_id)\
                                 .outerjoin(entregas, entregas.c.plano_entrega_id == planos_entregas.id)\
                                 .outerjoin(planos_trab,planos_trab.c.pe_id == planos_entregas.id)\
-                                .outerjoin(avaliacoes,avaliacoes.plano_entrega_id == planos_entregas.id)\
+                                .outerjoin(avaliacoes_pes,avaliacoes_pes.c.plano_entrega_id == planos_entregas.id)\
                                 .filter(planos_entregas.deleted_at == None,
                                         planos_entregas.data_inicio >= data_ref(dias))\
                                 .order_by(planos_entregas.status, Unidades.sigla, planos_entregas.data_inicio)\
@@ -95,6 +98,14 @@ def lista_pe():
     quantidade = len(planos_entregas_todos)
 
     qtd_pes_total =  db.session.query(planos_entregas.id).filter(planos_entregas.deleted_at == None).count()
+
+    avaliacoes_dados = db.session.query(avaliacoes.plano_entrega_id,
+                                        avaliacoes.nota,
+                                        avaliacoes.justificativa,
+                                        avaliacoes.data_avaliacao)\
+                               .filter(avaliacoes.plano_entrega_id != None)\
+                               .order_by(avaliacoes.data_avaliacao.desc())\
+                               .all()
 
     form = CSV_Form()
 
@@ -120,6 +131,7 @@ def lista_pe():
                                             planos_entregas_todos = planos_entregas_todos,
                                             quantidade = quantidade,
                                             qtd_pes_total = qtd_pes_total,
+                                            avaliacoes_dados = avaliacoes_dados,
                                             form = form,
                                             data_ref = data_ref(dias))
 

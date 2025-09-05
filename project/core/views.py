@@ -28,7 +28,14 @@ from datetime import datetime as dt, timedelta
 
 import os
 
+from sqlalchemy import func, or_, case, and_, text
+from sqlalchemy.sql import label
+
+from project import db
+
 from project.core.forms import data_ref_Form
+
+from project.models import planos_entregas, avaliacoes, planos_trabalhos, planos_trabalhos_consolidacoes
 
 core = Blueprint("core",__name__)
 
@@ -91,6 +98,109 @@ def data_referencia():
         return render_template('index.html', data_ref = data_ref(form.dias_atras.data), dias_data_ref = str(form.dias_atras.data))
     
     return render_template('dias_data_ref.html', form = form)
+
+
+@core.route('/numeros')
+def numeros():
+    """
+    +---------------------------------------------------------------------------------------+
+    |Números para uma visão geral do PGD.                                                   |
+    +---------------------------------------------------------------------------------------+
+    """
+
+    hoje = dt.now()
+
+    qtd_pes =  db.session.query(label('pes_total',func.count(planos_entregas.id)),
+                                label('pes_ativ',func.count(case((planos_entregas.status == 'ATIVO',planos_entregas.id)))),
+                                label('pes_ativ_venc',func.count(case((and_(planos_entregas.status == 'ATIVO', planos_entregas.data_fim > hoje),planos_entregas.id)))),
+                                label('pes_incl',func.count(case((planos_entregas.status == 'INCLUIDO',planos_entregas.id)))),
+                                label('pes_incl_venc',func.count(case((and_(planos_entregas.status == 'INCLUIDO', planos_entregas.data_fim > hoje),planos_entregas.id)))),
+                                label('pes_homo',func.count(case((planos_entregas.status == 'HOMOLOGANDO',planos_entregas.id)))),
+                                label('pes_homo_venc',func.count(case((and_(planos_entregas.status == 'HOMOLOGANDO', planos_entregas.data_fim > hoje),planos_entregas.id)))),
+                                label('pes_conc',func.count(case((planos_entregas.status == 'CONCLUIDO',planos_entregas.id)))),
+                                label('pes_aval',func.count(case((planos_entregas.status == 'AVALIADO',planos_entregas.id)))),
+                                label('pes_canc',func.count(case((planos_entregas.status == 'CANCELADO',planos_entregas.id)))),
+                                label('pes_susp',func.count(case((planos_entregas.status == 'SUSPENSO',planos_entregas.id)))))\
+                          .filter(planos_entregas.deleted_at == None)\
+                          .all()
+
+    avaliacoes_dados = db.session.query(label('dif_datas',func.datediff(avaliacoes.data_avaliacao,planos_entregas.data_fim)))\
+                                 .outerjoin(planos_entregas, planos_entregas.id == avaliacoes.plano_entrega_id)\
+                                 .filter(avaliacoes.plano_entrega_id != None)\
+                                 .all()
+    
+    # sum_dif_datas = 0
+    # n = 0
+    # for a in avaliacoes_dados:
+    #     if a.dif_datas > 0:
+    #         sum_dif_datas += a.dif_datas
+    #         n += 1
+    # if n != 0:
+    #     mda = sum_dif_datas/n
+    # else:
+    #     mda = 0
+  
+    dados = [ a.dif_datas for a in avaliacoes_dados if a.dif_datas != None and a.dif_datas > 0 ]
+    n = len(dados)
+    media_a_pes = sum(dados) / n
+    variancia_a_pes = sum([(x - media_a_pes) ** 2 for x in dados]) / n  # Para desvio padrão populacional
+    desvio_padrao_a_pes = variancia_a_pes ** 0.5
+
+    qtd_pts =  db.session.query(label('pts_total',func.count(planos_trabalhos.id)),
+                                label('pts_ativ',func.count(case((planos_trabalhos.status == 'ATIVO',planos_trabalhos.id)))),
+                                label('pts_ativ_venc',func.count(case((and_(planos_trabalhos.status == 'ATIVO', planos_trabalhos.data_fim > hoje),planos_trabalhos.id)))),
+                                label('pts_incl',func.count(case((planos_trabalhos.status == 'INCLUIDO',planos_trabalhos.id)))),
+                                label('pts_incl_venc',func.count(case((and_(planos_trabalhos.status == 'INCLUIDO', planos_trabalhos.data_fim > hoje),planos_trabalhos.id)))),
+                                label('pts_agas',func.count(case((planos_trabalhos.status == 'AGUARDANDO_ASSINATURA',planos_trabalhos.id)))),
+                                label('pts_agas_venc',func.count(case((and_(planos_trabalhos.status == 'AGUARDANDO_ASSINATURA', planos_trabalhos.data_fim > hoje),planos_trabalhos.id)))),
+                                label('pts_conc',func.count(case((planos_trabalhos.status == 'CONCLUIDO',planos_trabalhos.id)))),
+                                label('pts_aval',func.count(case((planos_trabalhos.status == 'AVALIADO',planos_trabalhos.id)))),
+                                label('pts_canc',func.count(case((planos_trabalhos.status == 'CANCELADO',planos_trabalhos.id)))),
+                                label('pts_susp',func.count(case((planos_trabalhos.status == 'SUSPENSO',planos_trabalhos.id)))))\
+                          .filter(planos_trabalhos.deleted_at == None)\
+                          .all()
+    
+    # Contando avaliaçaões em consolidaçoes de pts
+    pts_conclu = db.session.query(planos_trabalhos.id)\
+                           .filter(planos_trabalhos.status == 'CONCLUIDO')\
+                           .subquery()
+    avaliacoes_pt_consol = db.session.query(planos_trabalhos_consolidacoes.plano_trabalho_id)\
+                                     .join(pts_conclu, pts_conclu.c.id == planos_trabalhos_consolidacoes.plano_trabalho_id)\
+                                     .filter(planos_trabalhos_consolidacoes.status == 'AVALIADO',
+                                             planos_trabalhos_consolidacoes.deleted_at == None)\
+                                     .distinct().all()
+    qtd_pts_aval = len(avaliacoes_pt_consol)
+
+    # Calculado media das distâncias entre envios de registros e respectivas avaliações
+    avaliacoes_pt = db.session.query(planos_trabalhos_consolidacoes.plano_trabalho_id,
+                                     label('dt_conclu',planos_trabalhos_consolidacoes.data_conclusao),
+                                     label('dt_avaliacao',avaliacoes.data_avaliacao),
+                                     label('dif_datas',func.datediff(avaliacoes.data_avaliacao, planos_trabalhos_consolidacoes.data_conclusao)))\
+                              .join(avaliacoes, avaliacoes.plano_trabalho_consolidacao_id == planos_trabalhos_consolidacoes.id)\
+                              .order_by(planos_trabalhos_consolidacoes.plano_trabalho_id)\
+                              .all()
+    
+    # sum_dif_datas_pts = 0
+    # n = 0
+    # for a in avaliacoes_pt:
+    #     if a.dif_datas != None and a.dif_datas > 0:
+    #         sum_dif_datas_pts += a.dif_datas
+    #         n += 1
+    # if n != 0:
+    #     mda_pts = sum_dif_datas_pts/n
+    # else:
+    #     mda_pts = 0
+
+    dados = [ a.dif_datas for a in avaliacoes_pt if a.dif_datas != None and a.dif_datas > 0 ]
+    n = len(dados)
+    media = sum(dados) / n
+    variancia = sum([(x - media) ** 2 for x in dados]) / n  # Para desvio padrão populacional
+    desvio_padrao = variancia ** 0.5  
+
+    return render_template('numeros.html', qtd_pes = qtd_pes, mda = media_a_pes, des_pes = desvio_padrao_a_pes,
+                                           qtd_pts = qtd_pts, 
+                                           mda_pts = media, des_pts = desvio_padrao,
+                                           qtd_pts_aval = qtd_pts_aval)
 
 @core.route('/v_a')
 def v_a():

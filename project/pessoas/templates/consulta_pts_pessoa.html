@@ -74,7 +74,7 @@
             {% endif %} 
           </p> 
         </p></td>
-        <td><p align = "center"> {{p.carga_horaria|decimal_com_virgula}} ({{p.forma_contagem_carga_horaria}}) </p></td>  
+        <td><p align = "center"> {{p.carga_horaria|decimal_com_virgula(1)}} ({{p.forma_contagem_carga_horaria}}) </p></td>  
 
         <td><p align = "center">
           {% if p.qtd_aval != None %}

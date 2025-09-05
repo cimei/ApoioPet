@@ -1,5 +1,10 @@
 ## Atualizações ##
 
+05/09/2025
+
+Inclusão de tela com alguns números sobre o PGD para monitoramento.
+v1.0.7
+
 29/08/2025
 
 Requerida a informação da quantidade de dias para se definir uma data de referência para o

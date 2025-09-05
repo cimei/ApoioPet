@@ -222,6 +222,36 @@
                       </ul>
                     </div>
 
+                    <div class="menu-folder"><a class="menu-item" href="javascript: void(0)"><span class="icon"><i
+                      class="fa fa-bug" aria-hidden="true"></i></span><span class="content">Erros em Envios</span></a>
+                      <ul>
+                        <li><a class="menu-item divider" href="{{url_for('envios.envios_insucesso')}}"><span
+                            class="icon"><i class="fa fa-list" aria-hidden="true"></i></span><span
+                            class="content">Listar</span></a>
+                        </li>     
+                      </ul>
+                    </div>
+
+                    <div class="menu-folder"><a class="menu-item" href="javascript: void(0)"><span class="icon"><i
+                      class="fa fa-percent" aria-hidden="true"></i></span><span class="content">Números</span></a>
+                      <ul>
+                        <li><a class="menu-item divider" href="{{url_for('core.numeros')}}"><span
+                            class="icon"><i class="fa fa-list" aria-hidden="true"></i></span><span
+                            class="content">Visualizar</span></a>
+                        </li>     
+                      </ul>
+                    </div>
+
+                    <div class="menu-folder"><a class="menu-item" href="javascript: void(0)"><span class="icon"><i
+                      class="fa fa-calendar-check" aria-hidden="true"></i></span><span class="content">Data de Referência</span></a>
+                      <ul>
+                        <li><a class="menu-item divider" href="{{url_for('core.data_referencia')}}"><span
+                            class="icon"><i class="fa fa-list" aria-hidden="true"></i></span><span
+                            class="content">Definir</span></a>
+                        </li>     
+                      </ul>
+                    </div>
+
                   {% endif %}
 
                 </nav>
@@ -323,7 +353,7 @@
     <footer class="br-footer pt-3" id="footer">
       <div class="container-lg">
         <div class="info">
-          {% set ver = namespace(num = '1.0.6') %}
+          {% set ver = namespace(num = '1.0.7') %}
           <div class="text-down-01 text-medium pb-3">{{'DB_DATABASE'|verifica_serv_bd}} em
             {{'DB_SERVER'|verifica_serv_bd}} - v. {{ ver.num }} <small>cbt</small>
           </div>

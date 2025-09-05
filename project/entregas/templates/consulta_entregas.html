@@ -140,7 +140,7 @@
                                   <tr>
                                     <td><p align = "center">{{item.undSiglaCompleta}}</p></td>
                                     <td><p align = "center">{{item.trabs_qtd}}</p></td>
-                                    <td><p align = "center">{{(item.esforco_soma / item.qtd_pessoas)|decimal_com_virgula}} %</p></td>
+                                    <td><p align = "center">{{(item.esforco_soma / item.qtd_pessoas)|decimal_com_virgula(1)}} %</p></td>
                                   </tr>  
                                 {% endif %}
                               {% endfor %}    
