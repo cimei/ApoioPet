@@ -37,7 +37,7 @@
                   </span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                  &emsp;&emsp;&emsp;&emsp;Vencidos <span>
+                  &emsp;<a href="{{url_for('entregas.lista_pe', tipo='ativ_venc')}}">Vencidos</a> <span>
                     <span class="br-tag count bg-warning" title="">{{q.pes_ativ_venc|decimal_com_virgula(0)}}</span>
                     <span class="br-tag count bg-warning" title="% sobre o total de Planos de Entregas ATIVOS">{{ (100 * q.pes_ativ_venc / q.pes_ativ)|decimal_com_virgula(1) }}% </span>
                   </span>
@@ -49,7 +49,7 @@
                   </span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                  &emsp;&emsp;&emsp;&emsp;Vencidos <span>
+                  &emsp;<a href="{{url_for('entregas.lista_pe', tipo='incl_venc')}}">Vencidos</a> <span>
                   <span class="br-tag count bg-warning" title="">{{q.pes_incl_venc|decimal_com_virgula(0)}}</span>
                   <span class="br-tag count bg-warning" title="% sobre o total de Planos de Entregas INCLUIDOS">{{ (100 * q.pes_incl_venc / q.pes_incl)|decimal_com_virgula(1) }}% </span>
                   </span>
@@ -61,7 +61,7 @@
                   </span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                  &emsp;&emsp;&emsp;&emsp;Vencidos <span>
+                  &emsp;<a href="{{url_for('entregas.lista_pe', tipo='homo_venc')}}">Vencidos</a> <span>
                   <span class="br-tag count bg-warning">{{q.pes_homo_venc|decimal_com_virgula(0)}}</span>
                   <span class="br-tag count bg-warning" title="% sobre o total de Planos de Entregas HOMOLOGANDO">{{ (100 * q.pes_homo_venc / q.pes_homo)|decimal_com_virgula(1) }}% </span>
                   </span>
@@ -124,7 +124,7 @@
                   </span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                  &emsp;&emsp;&emsp;&emsp;Vencidos <span>
+                  &emsp;<a href="{{url_for('trabalhos.lista_pts', tipo='ativ_venc')}}">Vencidos</a> <span>
                     <span class="br-tag count bg-warning" title="">{{q.pts_ativ_venc|decimal_com_virgula(0)}}</span>
                     <span class="br-tag count bg-warning" title="% sobre o total de Planos de Entregas ATIVOS">{{ (100 * q.pts_ativ_venc / q.pts_ativ)|decimal_com_virgula(1) }}% </span>
                   </span>
@@ -136,7 +136,7 @@
                   </span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                  &emsp;&emsp;&emsp;&emsp;Vencidos <span>
+                  &emsp;<a href="{{url_for('trabalhos.lista_pts', tipo='incl_venc')}}">Vencidos</a> <span>
                   <span class="br-tag count bg-warning" title="">{{q.pts_incl_venc|decimal_com_virgula(0)}}</span>
                   <span class="br-tag count bg-warning" title="% sobre o total de Planos de Entregas INCLUIDOS">{{ (100 * q.pts_incl_venc / q.pts_incl)|decimal_com_virgula(1) }}% </span>
                   </span>
@@ -148,7 +148,7 @@
                   </span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                  &emsp;&emsp;&emsp;&emsp;Vencidos <span>
+                  &emsp;<a href="{{url_for('trabalhos.lista_pts', tipo='agas_venc')}}">Vencidos</a> <span>
                   <span class="br-tag count bg-warning">{{q.pts_agas_venc|decimal_com_virgula(0)}}</span>
                   <span class="br-tag count bg-warning" title="% sobre o total de Planos de Entregas HOMOLOGANDO">{{ (100 * q.pts_agas_venc / q.pts_agas)|decimal_com_virgula(1) }}% </span>
                   </span>
@@ -160,7 +160,7 @@
                   </span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                  &emsp;&emsp;&emsp;&emsp;Não Avaliados <span>
+                  &emsp;<a href="{{url_for('trabalhos.lista_pts', tipo='conc_sava')}}">Não Avaliados</a> <span>
                   <span class="br-tag count bg-warning" title="">{{(q.pts_conc - qtd_pts_aval)|decimal_com_virgula(0)}}</span>
                   <span class="br-tag count bg-warning" title="% sobre o total de Planos de Entregas">{{ (100 * (q.pts_conc - qtd_pts_aval) / q.pts_conc)|decimal_com_virgula(1) }}% </span>
                   </span>

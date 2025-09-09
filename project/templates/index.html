@@ -19,7 +19,7 @@
       icon="fa-file-pen", 
       title="Planos de Entregas",
       description="Dados de Planos de Entregas",
-      link=url_for("entregas.lista_pe")
+      link=url_for("entregas.lista_pe", tipo = "geral")
     %}
       {% include "card_menu.html" %}
     {% endwith %}
@@ -28,7 +28,7 @@
       icon="fa-screwdriver-wrench", 
       title="Planos de Trabalho",
       description="Lista dos Planos de Trabalho",
-      link=url_for("trabalhos.lista_pts", lista = "Todos")
+      link=url_for("trabalhos.lista_pts", tipo = "geral")
     %}
       {% include "card_menu.html" %}
     {% endwith %}

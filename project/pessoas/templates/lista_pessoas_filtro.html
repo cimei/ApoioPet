@@ -65,6 +65,7 @@
             <th scope="col" data-field="spsDescricao" data-filter-control="input" data-sortable="true"><p align = "center">Situação</p></th>
             <th scope="col" data-field="tvnDescricao" data-filter-control="input" data-sortable="true"><p align = "center">Perfil</p></th>
             <th scope="col" data-sortable="true"><p align = "center">PTs</p></th>
+            <th scope="col" data-sortable="true"><p align = "center">Regr.</p></th>
           </tr>
         </thead>
         <tbody>
@@ -77,7 +78,44 @@
             <td><p align = "center"> {{p.matricula}} </p></td>
             <td><p align = "center"> {% if p.email == None %}N.I.{% else %}{{p.email}}{% endif %} </p></td>
             <td><p align = "center"> {% if p.sigla == None %}N.I.{% else %}{{p.sigla}}{% endif %} </p></td>
-            <td><p align = "center"> {% if p.atribuicao == None %}N.I.{% else %}{{p.atribuicao}}{% endif %} </p></td>
+            <td><p align = "center"> 
+              {% if p_atrib != None and p_atrib != '' and p_atrib != 'Todas' %}
+                {{ p_atrib }}
+              {% else %}
+              {% if p.atribuicoes != None and p.atribuicoes != 0 %}
+
+                <a href="#" data-bs-toggle='modal' data-bs-target='#atribuicoes_modal{{p.id}}{{p.sigla}}'> {{p.atribuicoes}} </a></abbr>
+          
+                  {# modal visualização das atribuições de uma pessoa #}
+                  <div class="modal fade" tabindex="-1" role="dialog" id="atribuicoes_modal{{p.id}}{{p.sigla}}">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h4 class="modal-title">Atribuições de {{ p.nome }} em {{ p.sigla }}</h4>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <ul class="small list-group">
+                            {% for a in atribuicoes_pessoas %}
+                              {% if a.id == p.id and a.sigla == p.sigla %}
+                                <li class="list-group-item">
+                                  <p><b>{{ a.atribuicao }}</b></p>
+                                </li>  
+                              {% endif %}
+                            {% endfor %}
+                          </ul>
+                        </div>
+                        <div class="modal-footer">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+              {% else %}
+                N.I.
+              {% endif %} 
+              {% endif %}
+            </p></td>
             <td><p align = "center"> {{p.situacao_funcional}} </p></td>
             <td><p align = "center"> 
               {% if p.perfil == None %}
@@ -93,7 +131,7 @@
             <td>  
               <p align = "center"> 
                 {% if p.qtd_planos_trab == None or p.qtd_planos_trab == 0 %}
-                  Não há
+                  0
                 {% else %}
                   <a style="text-decoration: none" href="{{url_for('pessoas.consulta_pts_pessoa',pessoa_id=p.id)}}" class="btn btn-outline-success btn-sm" role="button" aria-pressed="true">
                     {{p.qtd_planos_trab}}</a>
@@ -101,6 +139,14 @@
   
               </p>
             </td>  
+            <td><p align = "center">   
+              {% if p.qtd_regramentos == None or p.qtd_regramentos == 0 %}
+                0
+              {% else %}
+                <a style="text-decoration: none" href="{{url_for('pessoas.regramentos_pessoa',pessoa_id=p.id)}}" class="btn btn-outline-success btn-sm" role="button" aria-pressed="true">
+                  {{p.qtd_regramentos}}</a>
+              {% endif %}
+            </p></td>
 
           </tr>
 

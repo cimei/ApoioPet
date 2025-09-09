@@ -714,6 +714,42 @@ class programas(db.Model):
     def __repr__ (self):
         return f"{self.nome};{self.data_inicio};{self.data_fim}"
     
+# programas_participantes (relação de regramentos com pessoas)
+
+class programas_participantes(db.Model):
+
+    __tablename__ = 'programas_participantes'
+    # __table_args__ = {"schema": ""}
+
+    id           = db.Column(db.String, primary_key = True)
+    created_at   = db.Column(db.DateTime)
+    updated_at   = db.Column(db.DateTime)
+    deleted_at   = db.Column(db.DateTime)
+    habilitado   = db.Column(db.Integer)
+    programa_id  = db.Column(db.String)
+    usuario_id   = db.Column(db.String)
+    documento_id = db.Column(db.String)
+
+    def __init__(self, id
+                     , created_at
+                     , updated_at
+                     , deleted_at
+                     , habilitado
+                     , programa_id
+                     , usuario_id
+                     , documento_id):
+         
+        self.id           = id
+        self.created_at   = created_at
+        self.updated_at   = updated_at
+        self.deleted_at   = deleted_at
+        self.habilitado   = habilitado
+        self.programa_id  = programa_id
+        self.usuario_id   = usuario_id
+        self.documento_id = documento_id 
+
+    def __repr__ (self):
+        return f"{self.habilitado}"
 
 # Planos de Entregas
 

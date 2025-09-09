@@ -1,4 +1,12 @@
-## Atualizações ##
+//# Atualizações ##
+
+09/09/2025
+
+Correção na geração de csv para planos de entregas.
+Correção na apresentação dos gráficos.
+Inclusão de dados de regramentos na consulta a pessoas.
+Ajuste na informação de atribuições na lista de pessoas.
+v1.0.9
 
 05/09/2025
 

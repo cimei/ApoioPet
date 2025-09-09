@@ -29,7 +29,9 @@
     
     <div class="col-5">
 
-      <h4>Data de referência: <b>{{data_ref.strftime('%d/%m/%Y')}}</b></h4>
+      {% if tipo == 'geral' %}
+        <h4>Data de referência: <b>{{data_ref.strftime('%d/%m/%Y')}}</b></h4>
+      {% endif %}
 
     </div>
     
@@ -117,20 +119,40 @@
         <td><p align = "center"> {{p.nome}} </p></td>
         <td><p align = "center"> {{p.sigla}} </p></td>
         <td><p align = "center"> {{p.data_inicio.strftime('%d/%m/%Y')}} </p></td>
-        <td><p align = "center"> {{p.data_fim.strftime('%d/%m/%Y')}} </p></td> 
+        <td><p align = "center"> 
+          {% if p.vencido == 's' and (p.status == 'ATIVO' or p.status == 'AGUARDANDO_ASSINATURA' or p.status == 'INCLUIDO') %}
+              <b>{{p.data_fim.strftime('%d/%m/%Y')}}</b>
+          {% else %}  
+              {{p.data_fim.strftime('%d/%m/%Y')}}
+          {% endif %}
+        </p></td> 
         <td><p align = "center"> {{p.forma}} </p></td>
         <td><p align = "center">  
-            {% if p.vencido == 's' and p.status == 'ATIVO' %} 
-              <span class="text-danger"><b>{{p.status}}</b></span>
-            {% elif p.status == 'INCLUIDO' %}
-              <span class="text-primary">{{p.status}}</span>
-            {% elif p.status == 'AVALIADO' %}
-              <span class="text-success">{{p.status}}</span>  
-            {% elif p.status == 'AGUARDANDO_ASSINATURA' %}
-              <span class="text-warning">{{p.status}}</span>  
-            {% else %}
-              <span class="text-dark">{{p.status}}</span>
-            {% endif %}
+          {% if p.status == 'INCLUIDO' %}
+                {% if p.vencido == 's' %}
+                  <span class="text-primary"><b>{{p.status}}</b></span>
+                {% else %}
+                  <span class="text-primary">{{p.status}}</span>
+                {% endif %}  
+              {% elif p.status == 'ATIVO' %}
+                {% if p.vencido == 's' %}
+                  <span class="text-danger"><b>{{p.status}}</b></span>
+                {% else %}
+                  <span class="text-success">{{p.status}}</span>
+                {% endif %}
+              {% elif p.status == 'AGUARDANDO_ASSINATURA' %}
+                {% if p.vencido == 's' %}
+                  <span class="text-warning"><b>{{p.status}}</b></span>
+                {% else %}
+                  <span class="text-warning">{{p.status}}</span>
+                {% endif %}
+              {% elif p.status == 'CANCELADO' %}
+                <span class="text-secondary">{{p.status}}</span>
+              {% elif p.status == 'AVALIADO' %}
+                <span class="text-info">{{p.status}}</span>  
+              {% else %}
+                <span class="text-dark">{{p.status}}</span>
+              {% endif %}
         </p></td>
         <td><p align = "center"> {{p.carga_horaria|decimal_com_virgula(1)}} ({{p.forma_contagem_carga_horaria}}) </p></td>  
         <td><p align = "center"> 

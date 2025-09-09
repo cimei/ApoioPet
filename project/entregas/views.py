@@ -29,9 +29,9 @@ entregas = Blueprint("entregas",__name__,template_folder='templates')
 
 ## lista planos de entregas
 
-@entregas.route('/lista_pe',methods=['GET','POST'])
+@entregas.route('/<tipo>/lista_pe',methods=['GET','POST'])
 @login_required
-def lista_pe():
+def lista_pe(tipo):
     """
     +---------------------------------------------------------------------------------------+
     |Apresenta os planos de entregas.                                                       |
@@ -71,31 +71,70 @@ def lista_pe():
 
     hoje = dt.now()
         
-    planos_entregas_todos = db.session.query(planos_entregas.id,
-                                       planos_entregas.status,
-                                       planos_entregas.data_inicio,
-                                       planos_entregas.data_fim,
-                                       planos_entregas.deleted_at,
-                                       entregas.c.qtd_entregas,
-                                       planos_trab.c.qtd_planos_trab,
-                                       Unidades.sigla,
-                                       label('sigla_pai', unidades_pai.sigla),
-                                       planos_entregas.unidade_id,
-                                       Unidades.unidade_pai_id,
-                                       label('vencido',case((planos_entregas.data_fim < hoje, literal_column("'s'")), else_=literal_column("'n'"))),
-                                       avaliacoes_pes.c.qtd_aval)\
-                                .join(Unidades, Unidades.id == planos_entregas.unidade_id)\
-                                .outerjoin(unidades_pai, unidades_pai.id == Unidades.unidade_pai_id)\
-                                .outerjoin(entregas, entregas.c.plano_entrega_id == planos_entregas.id)\
-                                .outerjoin(planos_trab,planos_trab.c.pe_id == planos_entregas.id)\
-                                .outerjoin(avaliacoes_pes,avaliacoes_pes.c.plano_entrega_id == planos_entregas.id)\
-                                .filter(planos_entregas.deleted_at == None,
-                                        planos_entregas.data_inicio >= data_ref(dias))\
-                                .order_by(planos_entregas.status, Unidades.sigla, planos_entregas.data_inicio)\
-                                .all() 
-                               
+    if tipo == 'geral':
 
-    quantidade = len(planos_entregas_todos)
+        planos_entregas_todos = db.session.query(planos_entregas.id,
+                                        planos_entregas.status,
+                                        planos_entregas.data_inicio,
+                                        planos_entregas.data_fim,
+                                        planos_entregas.deleted_at,
+                                        entregas.c.qtd_entregas,
+                                        planos_trab.c.qtd_planos_trab,
+                                        Unidades.sigla,
+                                        label('sigla_pai', unidades_pai.sigla),
+                                        planos_entregas.unidade_id,
+                                        Unidades.unidade_pai_id,
+                                        label('vencido',case((planos_entregas.data_fim < hoje, literal_column("'s'")), else_=literal_column("'n'"))),
+                                        avaliacoes_pes.c.qtd_aval)\
+                                    .join(Unidades, Unidades.id == planos_entregas.unidade_id)\
+                                    .outerjoin(unidades_pai, unidades_pai.id == Unidades.unidade_pai_id)\
+                                    .outerjoin(entregas, entregas.c.plano_entrega_id == planos_entregas.id)\
+                                    .outerjoin(planos_trab,planos_trab.c.pe_id == planos_entregas.id)\
+                                    .outerjoin(avaliacoes_pes,avaliacoes_pes.c.plano_entrega_id == planos_entregas.id)\
+                                    .filter(planos_entregas.deleted_at == None,
+                                            planos_entregas.data_inicio >= data_ref(dias))\
+                                    .order_by(planos_entregas.status, Unidades.sigla, planos_entregas.data_inicio)\
+                                    .all() 
+                                
+
+        quantidade = len(planos_entregas_todos)
+
+    else:
+
+        if tipo == 'ativ_venc':
+            status_pesq = 'ATIVO'
+        elif tipo == 'incl_venc':
+            status_pesq = 'INCLUIDO'
+        elif tipo == 'homo_venc':
+            status_pesq = 'HOMOLOGANDO'
+
+        planos_entregas_todos = db.session.query(planos_entregas.id,
+                                        planos_entregas.status,
+                                        planos_entregas.data_inicio,
+                                        planos_entregas.data_fim,
+                                        planos_entregas.deleted_at,
+                                        entregas.c.qtd_entregas,
+                                        planos_trab.c.qtd_planos_trab,
+                                        Unidades.sigla,
+                                        label('sigla_pai', unidades_pai.sigla),
+                                        planos_entregas.unidade_id,
+                                        Unidades.unidade_pai_id,
+                                        label('vencido',case((planos_entregas.data_fim < hoje, literal_column("'s'")), else_=literal_column("'n'"))),
+                                        avaliacoes_pes.c.qtd_aval)\
+                                    .join(Unidades, Unidades.id == planos_entregas.unidade_id)\
+                                    .outerjoin(unidades_pai, unidades_pai.id == Unidades.unidade_pai_id)\
+                                    .outerjoin(entregas, entregas.c.plano_entrega_id == planos_entregas.id)\
+                                    .outerjoin(planos_trab,planos_trab.c.pe_id == planos_entregas.id)\
+                                    .outerjoin(avaliacoes_pes,avaliacoes_pes.c.plano_entrega_id == planos_entregas.id)\
+                                    .filter(planos_entregas.deleted_at == None,
+                                            planos_entregas.data_fim < hoje,
+                                            planos_entregas.status == status_pesq)\
+                                    .order_by(planos_entregas.status, Unidades.sigla, planos_entregas.data_inicio)\
+                                    .all() 
+                                
+
+        quantidade = len(planos_entregas_todos)
+
 
     qtd_pes_total =  db.session.query(planos_entregas.id).filter(planos_entregas.deleted_at == None).count()
 
@@ -113,9 +152,9 @@ def lista_pe():
 
         csv_caminho_arquivo = os.path.normpath('/app/project/static/planos_entrega.csv')
         
-        dados_a_escrever = [[p.sigla, p.status, p.data_inicio, p.data_fim, p.qtd_entregas, p.qtd_planos_trab, p.nota] for p in planos_entregas_todos]
+        dados_a_escrever = [[p.sigla, p.status, p.data_inicio, p.data_fim, p.qtd_entregas, p.qtd_planos_trab, p.qtd_aval] for p in planos_entregas_todos]
 
-        header = ['Unidade', 'Status','Início','Fim', 'Qtd. Entregas', 'Qtd. PTs', 'Nota']
+        header = ['Unidade', 'Status','Início','Fim', 'Qtd. Entregas', 'Qtd. PTs', 'Qtd. Avaliações']
 
         with open(csv_caminho_arquivo, 'w', newline='') as csvfile:
             csv_writer = csv.writer(csvfile)
@@ -133,7 +172,8 @@ def lista_pe():
                                             qtd_pes_total = qtd_pes_total,
                                             avaliacoes_dados = avaliacoes_dados,
                                             form = form,
-                                            data_ref = data_ref(dias))
+                                            data_ref = data_ref(dias),
+                                            tipo = tipo)
 
 
 ## consulta entregas de um plano de entregas

@@ -23,7 +23,7 @@ from sqlalchemy import func, distinct
 from project import db
 from project.models import Unidades, unidades_integrantes, Pessoas, perfis, unidades_integrantes_atribuicoes, planos_trabalhos,\
                            planos_trabalhos_entregas, planos_entregas_entregas, tipos_modalidades, planos_trabalhos_consolidacoes,\
-                           avaliacoes
+                           avaliacoes, programas_participantes, programas
                             
 from project.pessoas.forms import PesquisaForm, CSV_Form
 
@@ -57,6 +57,17 @@ def lista_pessoas():
     else:
         pag = 100
     
+    atribuicoes_pessoas = db.session.query(Pessoas.id,
+                                           Unidades.sigla,
+                                           unidades_integrantes_atribuicoes.atribuicao)\
+                                    .outerjoin(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
+                                    .outerjoin(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
+                                    .join(Unidades, Unidades.id == unidades_integrantes.unidade_id)\
+                                    .filter(Pessoas.deleted_at == None)\
+                                    .order_by(Pessoas.id)\
+                                    .distinct().all()
+
+    
     # Lê tabela pessoas
 
     pessoas_lista = db.session.query(Pessoas.id,
@@ -66,18 +77,20 @@ def lista_pessoas():
                                      Pessoas.matricula,
                                      Pessoas.email,
                                      Unidades.sigla,
-                                     unidades_integrantes_atribuicoes.atribuicao,
+                                     label('atribuicoes',func.count(distinct(unidades_integrantes_atribuicoes.atribuicao))),
                                      Pessoas.situacao_funcional,
                                      label('perfil',perfis.nome),
-                                     label('qtd_planos_trab',func.count(distinct(planos_trabalhos.id))))\
+                                     label('qtd_planos_trab',func.count(distinct(planos_trabalhos.id))),
+                                     label('qtd_regramentos',func.count(distinct(programas_participantes.programa_id))))\
                                 .outerjoin(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
                                 .outerjoin(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                                 .outerjoin(Unidades, Unidades.id == unidades_integrantes.unidade_id)\
                                 .join(perfis, perfis.id == Pessoas.perfil_id)\
                                 .outerjoin(planos_trabalhos, planos_trabalhos.usuario_id == Pessoas.id)\
+                                .outerjoin(programas_participantes, programas_participantes.usuario_id == Pessoas.id)\
                                 .filter(Pessoas.deleted_at == None)\
                                 .order_by(Pessoas.nome)\
-                                .group_by(Pessoas.id,Unidades.sigla,unidades_integrantes_atribuicoes.atribuicao)\
+                                .group_by(Pessoas.id,Unidades.sigla)\
                                 .paginate(page=page,per_page=pag)
 
     quantidade = pessoas_lista.total
@@ -95,24 +108,35 @@ def lista_pessoas():
                                      Pessoas.matricula,
                                      Pessoas.email,
                                      Unidades.sigla,
-                                     unidades_integrantes_atribuicoes.atribuicao,
+                                     label('atribuicoes',func.count(distinct(unidades_integrantes_atribuicoes.atribuicao))),
                                      Pessoas.situacao_funcional,
                                      label('perfil',perfis.nome),
-                                     label('qtd_planos_trab',func.count(distinct(planos_trabalhos.id))))\
+                                     label('qtd_planos_trab',func.count(distinct(planos_trabalhos.id))),
+                                     label('qtd_regramentos',func.count(distinct(programas_participantes.programa_id))))\
                                 .outerjoin(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
                                 .outerjoin(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                                 .outerjoin(Unidades, Unidades.id == unidades_integrantes.unidade_id)\
                                 .join(perfis, perfis.id == Pessoas.perfil_id)\
                                 .outerjoin(planos_trabalhos, planos_trabalhos.usuario_id == Pessoas.id)\
+                                .outerjoin(programas_participantes, programas_participantes.usuario_id == Pessoas.id)\
                                 .filter(Pessoas.deleted_at == None)\
                                 .order_by(Pessoas.nome)\
-                                .group_by(Pessoas.id,Unidades.sigla,unidades_integrantes_atribuicoes.atribuicao)\
+                                .group_by(Pessoas.id,Unidades.sigla)\
                                 .all()
 
+        dados_a_escrever = []
+        for p in pessoas_csv:
+            atribs = ''
+            for a in atribuicoes_pessoas:
+                if a.id == p.id and a.sigla == p.sigla:
+                    if a.atribuicao != None:
+                        atribs += (a.atribuicao + ';')
+            atribs = atribs[:-1]        
+            dados_a_escrever.append([p.nome, p.data_nascimento, p.matricula, p.email, p.sigla, atribs, p.situacao_funcional, p.perfil, p.qtd_planos_trab, p.qtd_regramentos])
+        
+        # dados_a_escrever = [[p.nome, p.data_nascimento, p.matricula, p.email, p.sigla, p.atribuicao, p.situacao_funcional, p.perfil, p.qtd_planos_trab, p.qtd_regramentos] for p in pessoas_csv]
 
-        dados_a_escrever = [[p.nome, p.data_nascimento, p.matricula, p.email, p.sigla, p.atribuicao, p.situacao_funcional, p.perfil, p.qtd_planos_trab] for p in pessoas_csv]
-
-        header = ['Nome', 'Data Nasc.','Matrícula','E-mail', 'Unidade', 'Atribuição', 'Situação', 'Perfil', 'PTs']
+        header = ['Nome', 'Data Nasc.','Matrícula','E-mail', 'Unidade', 'Atribuições', 'Situação', 'Perfil', 'PTs', 'Regramentos']
 
         with open(csv_caminho_arquivo, 'w', newline='') as csvfile:
             csv_writer = csv.writer(csvfile)
@@ -129,7 +153,8 @@ def lista_pessoas():
                                                         quantidade = quantidade,
                                                         qtd_pessoas = qtd_pessoas,
                                                         tipo = tipo,
-                                                        form = form)
+                                                        form = form,
+                                                        atribuicoes_pessoas = atribuicoes_pessoas)
     
     
 ## lista pessoas da instituição conforme filtro aplicado
@@ -146,6 +171,16 @@ def lista_pessoas_filtro():
     """
 
     tipo = "pesq"
+
+    atribuicoes_pessoas = db.session.query(Pessoas.id,
+                                           Unidades.sigla,
+                                           unidades_integrantes_atribuicoes.atribuicao)\
+                                    .outerjoin(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
+                                    .outerjoin(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
+                                    .join(Unidades, Unidades.id == unidades_integrantes.unidade_id)\
+                                    .filter(Pessoas.deleted_at == None)\
+                                    .order_by(Pessoas.id)\
+                                    .distinct().all()
 
     form = PesquisaForm() 
     
@@ -211,16 +246,18 @@ def lista_pessoas_filtro():
                                          Pessoas.matricula,
                                          Pessoas.email,
                                          Unidades.sigla,
-                                         unidades_integrantes_atribuicoes.atribuicao,
+                                         label('atribuicoes',func.count(distinct(unidades_integrantes_atribuicoes.atribuicao))),
                                          Pessoas.situacao_funcional,
                                          label('perfil',perfis.nome),
                                          label('perfil_id',perfis.id),
-                                         label('qtd_planos_trab',func.count(distinct(planos_trabalhos.id))))\
+                                         label('qtd_planos_trab',func.count(distinct(planos_trabalhos.id))),
+                                         label('qtd_regramentos',func.count(distinct(programas_participantes.programa_id))))\
                                   .outerjoin(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
                                   .outerjoin(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                                   .outerjoin(Unidades, Unidades.id == unidades_integrantes.unidade_id)\
                                   .join(perfis, perfis.id == Pessoas.perfil_id)\
                                   .outerjoin(planos_trabalhos, planos_trabalhos.usuario_id == Pessoas.id)\
+                                  .outerjoin(programas_participantes, programas_participantes.usuario_id == Pessoas.id)\
                                   .filter(Pessoas.deleted_at == None,
                                           Pessoas.nome.like('%'+nome_pesq+'%'),
                                           Unidades.id.like(p_unid_pattern),
@@ -228,7 +265,7 @@ def lista_pessoas_filtro():
                                           perfis.id.like(p_perf_pattern),
                                           unidades_integrantes_atribuicoes.atribuicao.like(p_atrib_pattern))\
                                   .order_by(Pessoas.nome)\
-                                  .group_by(Pessoas.id,Unidades.sigla,unidades_integrantes_atribuicoes.atribuicao)\
+                                  .group_by(Pessoas.id,Unidades.sigla)\
                                   .all()
     
         quantidade = len(pessoas_lista)
@@ -239,7 +276,8 @@ def lista_pessoas_filtro():
                                                         tipo = tipo,
                                                         p_atrib = p_atrib, p_perf = p_perf,
                                                         p_situ = p_situ, p_unid = p_unid, p_nome = nome_pesq,
-                                                        filtro = filtro)
+                                                        filtro = filtro,
+                                                        atribuicoes_pessoas = atribuicoes_pessoas)
 
 
     return render_template('pesquisa_pessoas.html', form = form)
@@ -261,6 +299,16 @@ def csv_pessoas_filtro(filtro):
 
     filtro = filtro.split(',')
 
+    atribuicoes_pessoas = db.session.query(Pessoas.id,
+                                           Unidades.sigla,
+                                           unidades_integrantes_atribuicoes.atribuicao)\
+                                    .outerjoin(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
+                                    .outerjoin(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
+                                    .join(Unidades, Unidades.id == unidades_integrantes.unidade_id)\
+                                    .filter(Pessoas.deleted_at == None)\
+                                    .order_by(Pessoas.id)\
+                                    .distinct().all()
+
     pessoas_csv_filtro = db.session.query(Pessoas.id,
                                          Pessoas.nome,
                                          Pessoas.cpf,
@@ -268,16 +316,18 @@ def csv_pessoas_filtro(filtro):
                                          Pessoas.matricula,
                                          Pessoas.email,
                                          Unidades.sigla,
-                                         unidades_integrantes_atribuicoes.atribuicao,
+                                         label('atribuicoes',func.count(distinct(unidades_integrantes_atribuicoes.atribuicao))),
                                          Pessoas.situacao_funcional,
                                          label('perfil',perfis.nome),
                                          label('perfil_id',perfis.id),
-                                         label('qtd_planos_trab',func.count(distinct(planos_trabalhos.id))))\
+                                         label('qtd_planos_trab',func.count(distinct(planos_trabalhos.id))),
+                                         label('qtd_regramentos',func.count(distinct(programas_participantes.programa_id))))\
                                   .outerjoin(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
                                   .outerjoin(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                                   .outerjoin(Unidades, Unidades.id == unidades_integrantes.unidade_id)\
                                   .join(perfis, perfis.id == Pessoas.perfil_id)\
                                   .outerjoin(planos_trabalhos, planos_trabalhos.usuario_id == Pessoas.id)\
+                                  .outerjoin(programas_participantes, programas_participantes.usuario_id == Pessoas.id)\
                                   .filter(Pessoas.deleted_at == None,
                                           Pessoas.nome.like('%'+filtro[0][1:].split("'")[1]+'%'),
                                           Unidades.id.like(filtro[1].split("'")[1]),
@@ -285,14 +335,24 @@ def csv_pessoas_filtro(filtro):
                                           perfis.id.like(filtro[3].split("'")[1]),
                                           unidades_integrantes_atribuicoes.atribuicao.like(filtro[4][:-1].split("'")[1]))\
                                   .order_by(Pessoas.nome)\
-                                  .group_by(Pessoas.id,Unidades.sigla,unidades_integrantes_atribuicoes.atribuicao)\
+                                  .group_by(Pessoas.id,Unidades.sigla)\
                                   .all()
 
     csv_caminho_arquivo = os.path.normpath('/app/project/static/pessoas_filtro.csv')
 
-    dados_a_escrever = [[p.nome, p.data_nascimento, p.matricula, p.email, p.sigla, p.atribuicao, p.situacao_funcional, p.perfil, p.qtd_planos_trab] for p in pessoas_csv_filtro]
+    dados_a_escrever = []
+    for p in pessoas_csv_filtro:
+        atribs = ''
+        for a in atribuicoes_pessoas:
+            if a.id == p.id and a.sigla == p.sigla:
+                if a.atribuicao != None:
+                    atribs += (a.atribuicao + ';')
+        atribs = atribs[:-1]        
+        dados_a_escrever.append([p.nome, p.data_nascimento, p.matricula, p.email, p.sigla, atribs, p.situacao_funcional, p.perfil, p.qtd_planos_trab, p.qtd_regramentos])
+    
+    # dados_a_escrever = [[p.nome, p.data_nascimento, p.matricula, p.email, p.sigla, p.atribuicao, p.situacao_funcional, p.perfil, p.qtd_planos_trab, p.qtd_regramentos] for p in pessoas_csv_filtro]
 
-    header = ['Nome', 'Data Nasc.','Matrícula','E-mail', 'Unidade', 'Atribuição', 'Situação', 'Perfil', 'PTs']
+    header = ['Nome', 'Data Nasc.','Matrícula','E-mail', 'Unidade', 'Atribuições', 'Situação', 'Perfil', 'PTs', 'Regramentos']
 
     with open(csv_caminho_arquivo, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
@@ -354,5 +414,36 @@ def consulta_pts_pessoa(pessoa_id):
                                                 dados_pessoa = dados_pessoa,
                                                 planos_trab_pessoa = planos_trab_pessoa)                                                
         
+## lista regramentos vinculados a uma pessoa
 
+@pessoas.route('/<pessoa_id>/regramentos_pessoa')
+@login_required
+def regramentos_pessoa(pessoa_id):
+    """
+    +---------------------------------------------------------------------------------------+
+    |Apresenta uma lista de regramentos vinculados a uma pessoa.                            |
+    |                                                                                       |
+    +---------------------------------------------------------------------------------------+
+    """   
+                         
+    dados_pessoa = db.session.query(Pessoas.nome).filter(Pessoas.id == pessoa_id).first()                                          
+    
+    
+    regram_pessoa = db.session.query(programas_participantes.id,
+                                     programas_participantes.habilitado,
+                                     programas.nome,
+                                     programas.data_inicio,
+                                     programas.data_fim)\
+                              .join(programas, programas.id == programas_participantes.programa_id)\
+                              .filter(programas_participantes.deleted_at == None,
+                                      programas_participantes.usuario_id == pessoa_id)\
+                              .order_by(programas.data_inicio,)\
+                              .all()    
+
+    quantidade = len(regram_pessoa)
+
+
+    return render_template('consulta_regramentos_pessoa.html', quantidade = quantidade,
+                                                dados_pessoa = dados_pessoa,
+                                                regram_pessoa = regram_pessoa) 
 #

@@ -185,7 +185,7 @@
                     <div class="menu-folder"><a class="menu-item" href="javascript: void(0)"><span class="icon"><i
                       class="fa fa-file-pen" aria-hidden="true"></i></span><span class="content">Planos de Entregas</span></a>
                       <ul>
-                        <li><a class="menu-item divider" href="{{url_for('entregas.lista_pe')}}"><span
+                        <li><a class="menu-item divider" href="{{url_for('entregas.lista_pe',tipo='geral')}}"><span
                             class="icon"><i class="fa fa-list" aria-hidden="true"></i></span><span
                             class="content">Listar</span></a>
                         </li>
@@ -197,7 +197,7 @@
                     <div class="menu-folder"><a class="menu-item" href="javascript: void(0)"><span class="icon"><i
                             class="fa fa-screwdriver-wrench" aria-hidden="true"></i></span><span class="content">Planos de Trabalho</span></a>
                       <ul>
-                        <li><a class="menu-item" href="{{url_for('trabalhos.lista_pts', lista = 'Todos')}}"><span class="icon">
+                        <li><a class="menu-item" href="{{url_for('trabalhos.lista_pts', tipo = 'geral')}}"><span class="icon">
                           <i class="fa fa-list" aria-hidden="true"></i></span><span class="content">Listar</span></a>
                         </li>
                       </ul>
@@ -358,7 +358,7 @@
     <footer class="br-footer pt-3" id="footer">
       <div class="container-lg">
         <div class="info">
-          {% set ver = namespace(num = '1.0.8') %}
+          {% set ver = namespace(num = '1.0.9') %}
           <div class="text-down-01 text-medium pb-3">{{'DB_DATABASE'|verifica_serv_bd}} em
             {{'DB_SERVER'|verifica_serv_bd}} - v. {{ ver.num }} <small>cbt</small>
           </div>

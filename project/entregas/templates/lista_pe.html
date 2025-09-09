@@ -20,7 +20,9 @@
       <h4>Lista de Planos de Entregas</h4>
     </div>
     <div class="col-5">
-      <h4>Data de referência: <b>{{data_ref.strftime('%d/%m/%Y')}}</b></h4>
+      {% if tipo == 'geral' %}
+        <h4>Data de referência: <b>{{data_ref.strftime('%d/%m/%Y')}}</b></h4>
+      {% endif %}  
     </div>
     <div class="col-1">
       <form class="needs-validation" method='POST' >
