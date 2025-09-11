@@ -3,6 +3,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+
 <div class="col mb-5">
   <div class="br-breadcrumb">
     <ul class="crumb-list">
@@ -15,13 +19,122 @@
 </div>
 
 <div class="container">
-  <div class="jumbotron">
-
-    
 
     <div class="row">
 
-      <div class="col">
+      <div class="col-6">
+
+          <div class="card card border-secondary">
+
+            <div class="card-header">
+              <h4> <span class="br-tag bg-secondary" title="">{{ unids[0].unids_total }}</span> Unidades </h4>
+            </div>
+
+            <div class="card-body">
+
+              <div style="width: 30vw; height: 30vh;">
+                <canvas id="UnidsChart"></canvas>
+              </div>  
+              
+             <script>
+                const ctx_unids = document.getElementById('UnidsChart');
+
+                new Chart(ctx_unids, {
+                  type: 'doughnut',
+                  data: {
+                    labels: {{ rotulos_unids | safe }},
+                    datasets: [
+                      {
+                      label: 'Quantidade',
+                      data: {{ valores_unids | safe }},
+                      },
+                      
+                    ]
+                  },
+                  options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'top',
+                      },
+                      title: {
+                        display: true,
+                        text: 'Relação com Chefias'
+                      }
+                    }
+                  },
+                });
+
+              </script>   
+            
+            </div> 
+
+          </div>        
+
+      </div>
+
+      <div class="col-6">
+
+        <div class="card card border-secondary">
+
+            <div class="card-header">
+              <h4> <span class="br-tag bg-secondary" title="">{{ qtd_pessoas[0].pessoas_total }}</span> Pessoas </h4>
+            </div>
+
+            <div class="card-body">
+
+              <div style="width: 30vw; height: 30vh;">
+                <canvas id="PessoasChart"></canvas>
+              </div>  
+              
+             <script>
+                const ctx_pessoas = document.getElementById('PessoasChart');
+
+                new Chart(ctx_pessoas, {
+                  type: 'doughnut',
+                  data: {
+                    labels: {{ rotulos_pessoas | safe }},
+                    datasets: [
+                      {
+                      label: 'Regramento',
+                      data: {{ valores_pessoas | safe }},
+                      },
+                      {
+                      label: 'Plano de Trabalho',
+                      data: {{ valores_pessoas2 | safe }},
+                      },
+                    ]
+                  },
+                  options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'top',
+                        display: false
+                      },
+                      title: {
+                        display: true,
+                        text: 'Relação com Regramentos e Planos de Trabalho'
+                      }
+                    }
+                  },
+                });
+
+              </script>   
+            
+            </div> 
+        
+      </div>
+
+    </div>
+
+    <p></p>
+
+    <div class="row">
+
+      <div class="col-6">
 
           <div class="card card border-secondary">
 
@@ -68,11 +181,10 @@
             </div> 
 
           </div>   
-        
 
       </div>
 
-      <div class="col">
+      <div class="col-6">
 
           <div class="card card border-secondary">
             
@@ -127,7 +239,6 @@
    
     <p></p>
 
-  </div>
 </div>
 
 {% endblock %}

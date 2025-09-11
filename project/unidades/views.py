@@ -45,11 +45,6 @@ def lista_unidades():
 
     page = request.args.get('page', 1, type=int)
 
-    # unids_pai = db.session.query(Unidades.id,
-    #                              Unidades.sigla)\
-    #                       .filter(Unidades.deleted_at == None)\
-    #                       .subquery()
-
     # subqueries para ver quantos gestores cada unidade tem
     
     chefes_s = db.session.query(Pessoas.id,
@@ -60,7 +55,7 @@ def lista_unidades():
                        .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                        .filter(unidades_integrantes_atribuicoes.deleted_at == None,
                                unidades_integrantes_atribuicoes.atribuicao == 'GESTOR')\
-                       .subquery()
+                       .distinct().subquery()
     substitutos_s = db.session.query(Pessoas.id,
                                    Pessoas.nome,
                                    unidades_integrantes.unidade_id,
@@ -69,7 +64,7 @@ def lista_unidades():
                             .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                             .filter(unidades_integrantes_atribuicoes.deleted_at == None,
                                     unidades_integrantes_atribuicoes.atribuicao == 'GESTOR_SUBSTITUTO')\
-                            .subquery()
+                            .distinct().subquery()
     delegados_s = db.session.query(Pessoas.id,
                                    Pessoas.nome,
                                    unidades_integrantes.unidade_id,
@@ -78,7 +73,7 @@ def lista_unidades():
                             .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                             .filter(unidades_integrantes_atribuicoes.deleted_at == None,
                                     unidades_integrantes_atribuicoes.atribuicao == 'GESTOR_DELEGADO')\
-                            .subquery()
+                            .distinct().subquery()
                           
     # consultas que repetem as subqueries para poder listar os nomes em um modal
     
@@ -90,7 +85,7 @@ def lista_unidades():
                        .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                        .filter(unidades_integrantes_atribuicoes.deleted_at == None,
                                unidades_integrantes_atribuicoes.atribuicao == 'GESTOR')\
-                       .all()
+                       .distinct().all()
     substitutos = db.session.query(Pessoas.id,
                                    Pessoas.nome,
                                    unidades_integrantes.unidade_id,
@@ -99,7 +94,7 @@ def lista_unidades():
                             .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                             .filter(unidades_integrantes_atribuicoes.deleted_at == None,
                                     unidades_integrantes_atribuicoes.atribuicao == 'GESTOR_SUBSTITUTO')\
-                            .all()
+                            .distinct().all()
     delegados = db.session.query(Pessoas.id,
                                  Pessoas.nome,
                                  unidades_integrantes.unidade_id,
@@ -108,7 +103,7 @@ def lista_unidades():
                           .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                           .filter(unidades_integrantes_atribuicoes.deleted_at == None,
                                   unidades_integrantes_atribuicoes.atribuicao == 'GESTOR_DELEGADO')\
-                          .all()                      
+                          .distinct().all()                      
     
     # sobre paginação    
     pag = 500
@@ -120,7 +115,7 @@ def lista_unidades():
                              cidades.uf,
                              Unidades.path,
                              Unidades.codigo,
-                             label('titular',chefes_s.c.nome),
+                             label('titular',func.count(distinct(chefes_s.c.nome))),
                              label('substituto',func.count(distinct(substitutos_s.c.nome))),
                              label('delegado',func.count(distinct(delegados_s.c.nome))))\
                         .outerjoin(cidades, cidades.id == Unidades.cidade_id)\
@@ -129,7 +124,7 @@ def lista_unidades():
                         .outerjoin(delegados_s, delegados_s.c.unidade_id == Unidades.id)\
                         .filter(Unidades.deleted_at == None)\
                         .order_by(Unidades.sigla)\
-                        .group_by(Unidades.id,chefes_s.c.nome)\
+                        .group_by(Unidades.id)\
                         .paginate(page=page,per_page=pag)
 
     quantidade = unids.total 
@@ -162,7 +157,7 @@ def lista_unidades():
                                      cidades.uf,
                                      Unidades.path,
                                      Unidades.codigo,
-                                     label('titular',chefes_s.c.nome),
+                                     label('titular',func.count(distinct(chefes_s.c.nome))),
                                      label('substituto',func.count(distinct(substitutos_s.c.nome))),
                                      label('delegado',func.count(distinct(delegados_s.c.nome))))\
                         .outerjoin(cidades, cidades.id == Unidades.cidade_id)\
@@ -171,7 +166,7 @@ def lista_unidades():
                         .outerjoin(delegados_s, delegados_s.c.unidade_id == Unidades.id)\
                         .filter(Unidades.deleted_at == None)\
                         .order_by(Unidades.sigla)\
-                        .group_by(Unidades.id,chefes_s.c.nome)\
+                        .group_by(Unidades.id)\
                         .all()
 
 
@@ -259,7 +254,7 @@ def lista_unidades_filtro(lista):
                         .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                         .filter(unidades_integrantes_atribuicoes.deleted_at == None,
                                 unidades_integrantes_atribuicoes.atribuicao == 'GESTOR')\
-                        .subquery()
+                        .distinct().subquery()
         substitutos_s = db.session.query(Pessoas.id,
                                     Pessoas.nome,
                                     unidades_integrantes.unidade_id,
@@ -268,7 +263,7 @@ def lista_unidades_filtro(lista):
                                 .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                                 .filter(unidades_integrantes_atribuicoes.deleted_at == None,
                                         unidades_integrantes_atribuicoes.atribuicao == 'GESTOR_SUBSTITUTO')\
-                                .subquery()
+                                .distinct().subquery()
         delegados_s = db.session.query(Pessoas.id,
                                     Pessoas.nome,
                                     unidades_integrantes.unidade_id,
@@ -277,7 +272,7 @@ def lista_unidades_filtro(lista):
                                 .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                                 .filter(unidades_integrantes_atribuicoes.deleted_at == None,
                                         unidades_integrantes_atribuicoes.atribuicao == 'GESTOR_DELEGADO')\
-                                .subquery()
+                                .distinct().subquery()
                             
         # consultas que repetem as subqueries para poder listar os nomes em um modal
         
@@ -289,7 +284,7 @@ def lista_unidades_filtro(lista):
                         .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                         .filter(unidades_integrantes_atribuicoes.deleted_at == None,
                                 unidades_integrantes_atribuicoes.atribuicao == 'GESTOR')\
-                        .all()
+                        .distinct().all()
         substitutos = db.session.query(Pessoas.id,
                                     Pessoas.nome,
                                     unidades_integrantes.unidade_id,
@@ -298,7 +293,7 @@ def lista_unidades_filtro(lista):
                                 .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                                 .filter(unidades_integrantes_atribuicoes.deleted_at == None,
                                         unidades_integrantes_atribuicoes.atribuicao == 'GESTOR_SUBSTITUTO')\
-                                .all()
+                                .distinct().all()
         delegados = db.session.query(Pessoas.id,
                                     Pessoas.nome,
                                     unidades_integrantes.unidade_id,
@@ -307,7 +302,7 @@ def lista_unidades_filtro(lista):
                             .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                             .filter(unidades_integrantes_atribuicoes.deleted_at == None,
                                     unidades_integrantes_atribuicoes.atribuicao == 'GESTOR_DELEGADO')\
-                            .all()
+                            .distinct().all()
 
         unids = db.session.query(Unidades.id,
                                  Unidades.sigla,
@@ -316,8 +311,8 @@ def lista_unidades_filtro(lista):
                                  cidades.uf,
                                  Unidades.path,
                                  Unidades.codigo,
-                                 label('titular',chefes_s.c.nome),
-                                 label('substituto',func.count(distinct(substitutos_s.c.nome))),\
+                                 label('titular',func.count(distinct(chefes_s.c.nome))),
+                                 label('substituto',func.count(distinct(substitutos_s.c.nome))),
                                  label('delegado',func.count(distinct(delegados_s.c.nome))))\
                            .outerjoin(cidades, cidades.id == Unidades.cidade_id)\
                            .outerjoin(chefes_s, chefes_s.c.unidade_id == Unidades.id)\
@@ -328,7 +323,7 @@ def lista_unidades_filtro(lista):
                                    Unidades.nome.like('%'+form.nome.data+'%'),
                                    cidades.uf.like('%'+form.uf.data+'%'))\
                            .order_by(Unidades.sigla)\
-                           .group_by(Unidades.id,chefes_s.c.nome)\
+                           .group_by(Unidades.id)\
                            .paginate(page=page,per_page=500)
 
         quantidade = unids.total
@@ -387,7 +382,7 @@ def csv_lista_unidades_filtro(filtro):
                     .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                     .filter(unidades_integrantes_atribuicoes.deleted_at == None,
                             unidades_integrantes_atribuicoes.atribuicao == 'GESTOR')\
-                    .subquery()
+                    .distinct().subquery()
     substitutos_s = db.session.query(Pessoas.id,
                                 Pessoas.nome,
                                 unidades_integrantes.unidade_id,
@@ -396,7 +391,7 @@ def csv_lista_unidades_filtro(filtro):
                             .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                             .filter(unidades_integrantes_atribuicoes.deleted_at == None,
                                     unidades_integrantes_atribuicoes.atribuicao == 'GESTOR_SUBSTITUTO')\
-                            .subquery()
+                            .distinct().subquery()
     delegados_s = db.session.query(Pessoas.id,
                                 Pessoas.nome,
                                 unidades_integrantes.unidade_id,
@@ -405,7 +400,7 @@ def csv_lista_unidades_filtro(filtro):
                             .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                             .filter(unidades_integrantes_atribuicoes.deleted_at == None,
                                     unidades_integrantes_atribuicoes.atribuicao == 'GESTOR_DELEGADO')\
-                            .subquery()
+                            .distinct().subquery()
 
     unids_csv = db.session.query(Unidades.id,
                                 Unidades.sigla,
@@ -414,8 +409,8 @@ def csv_lista_unidades_filtro(filtro):
                                 cidades.uf,
                                 Unidades.path,
                                 Unidades.codigo,
-                                label('titular',chefes_s.c.nome),
-                                label('substituto',func.count(distinct(substitutos_s.c.nome))),\
+                                label('titular',func.count(distinct(chefes_s.c.nome))),
+                                label('substituto',func.count(distinct(substitutos_s.c.nome))),
                                 label('delegado',func.count(distinct(delegados_s.c.nome))))\
                         .outerjoin(cidades, cidades.id == Unidades.cidade_id)\
                         .outerjoin(chefes_s, chefes_s.c.unidade_id == Unidades.id)\
@@ -426,7 +421,7 @@ def csv_lista_unidades_filtro(filtro):
                                 Unidades.nome.like('%'+filtro[2].split("'")[1]+'%'),
                                 cidades.uf.like('%'+filtro[3][:-1].split("'")[1]+'%'))\
                         .order_by(Unidades.sigla)\
-                        .group_by(Unidades.id,chefes_s.c.nome)\
+                        .group_by(Unidades.id)\
                         .all()
     
     caminho = db.session.query(Unidades.path,Unidades.sigla,Unidades.id).all()

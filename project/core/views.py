@@ -28,14 +28,15 @@ from datetime import datetime as dt, timedelta
 
 import os
 
-from sqlalchemy import func, or_, case, and_, text
+from sqlalchemy import func, or_, case, and_, text, distinct
 from sqlalchemy.sql import label
 
 from project import db
 
 from project.core.forms import data_ref_Form
 
-from project.models import planos_entregas, avaliacoes, planos_trabalhos, planos_trabalhos_consolidacoes
+from project.models import planos_entregas, avaliacoes, planos_trabalhos, planos_trabalhos_consolidacoes,\
+                           Pessoas, programas_participantes, Unidades, unidades_integrantes, unidades_integrantes_atribuicoes
 
 core = Blueprint("core",__name__)
 
@@ -110,6 +111,8 @@ def numeros():
 
     hoje = dt.now()
 
+    # Dados de Planos de Entregas
+
     qtd_pes =  db.session.query(label('pes_total',func.count(planos_entregas.id)),
                                 label('pes_ativ',func.count(case((planos_entregas.status == 'ATIVO',planos_entregas.id)))),
                                 label('pes_ativ_venc',func.count(case((and_(planos_entregas.status == 'ATIVO', planos_entregas.data_fim < hoje),planos_entregas.id)))),
@@ -135,6 +138,8 @@ def numeros():
     variancia_a_pes = sum([(x - media_a_pes) ** 2 for x in dados]) / n  # Para desvio padrão populacional
     desvio_padrao_a_pes = variancia_a_pes ** 0.5
 
+    # Dados de Planos de Trabalho
+    
     qtd_pts =  db.session.query(label('pts_total',func.count(planos_trabalhos.id)),
                                 label('pts_ativ',func.count(case((planos_trabalhos.status == 'ATIVO',planos_trabalhos.id)))),
                                 label('pts_ativ_venc',func.count(case((and_(planos_trabalhos.status == 'ATIVO', planos_trabalhos.data_fim < hoje),planos_trabalhos.id)))),
@@ -174,10 +179,64 @@ def numeros():
     variancia = sum([(x - media) ** 2 for x in dados]) / n  # Para desvio padrão populacional
     desvio_padrao = variancia ** 0.5  
 
+    # Dados de Pessoas
+
+    pessoas_subq = db.session.query(Pessoas.id,
+                                     label('qtd_planos_trab',func.count(distinct(planos_trabalhos.id))),
+                                     label('qtd_regramentos',func.count(distinct(programas_participantes.programa_id))))\
+                                .outerjoin(planos_trabalhos, planos_trabalhos.usuario_id == Pessoas.id)\
+                                .outerjoin(programas_participantes, programas_participantes.usuario_id == Pessoas.id)\
+                                .filter(Pessoas.deleted_at == None)\
+                                .group_by(Pessoas.id)\
+                                .subquery()
+
+    qtd_pessoas = db.session.query(label('pessoas_total',func.count(pessoas_subq.c.id)),
+                                   label('com_pt',func.count(case((pessoas_subq.c.qtd_planos_trab != 0,pessoas_subq.c.id)))),
+                                   label('com_regra',func.count(case((pessoas_subq.c.qtd_regramentos != 0,pessoas_subq.c.id)))))\
+                            .all()
+    
+
+    # Dados de Unidades
+
+    chefes_s = db.session.query(Pessoas.id,
+                                unidades_integrantes.unidade_id,
+                                unidades_integrantes_atribuicoes.atribuicao)\
+                         .join(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
+                         .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
+                         .filter(unidades_integrantes_atribuicoes.deleted_at == None,
+                                 unidades_integrantes_atribuicoes.atribuicao == 'GESTOR')\
+                       .distinct().subquery()
+    substitutos_s = db.session.query(Pessoas.id,
+                                   unidades_integrantes.unidade_id,
+                                   unidades_integrantes_atribuicoes.atribuicao)\
+                            .join(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
+                            .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
+                            .filter(unidades_integrantes_atribuicoes.deleted_at == None,
+                                    unidades_integrantes_atribuicoes.atribuicao == 'GESTOR_SUBSTITUTO')\
+                            .distinct().subquery()
+    
+    unidades_s = db.session.query(label('id',Unidades.id),
+                                  label('cont_tit', func.count(distinct(chefes_s.c.id))),
+                                  label('cont_sub', func.count(distinct(substitutos_s.c.id))))\
+                            .outerjoin(chefes_s, chefes_s.c.unidade_id == Unidades.id)\
+                            .outerjoin(substitutos_s, substitutos_s.c.unidade_id == Unidades.id)\
+                            .filter(Unidades.deleted_at == None)\
+                            .group_by(Unidades.id)\
+                            .distinct().subquery()
+                                  
+
+    unids = db.session.query(label('unids_total',func.count(distinct(unidades_s.c.id))),
+                             label('sem_chefe',func.count(case((and_(unidades_s.c.cont_tit == 0, unidades_s.c.cont_sub == 0), unidades_s.c.id)))),
+                             label('sem_titu',func.count(case((unidades_s.c.cont_tit == 0, unidades_s.c.id)))),
+                             label('sem_subs',func.count(case((unidades_s.c.cont_sub == 0, unidades_s.c.id)))))\
+                       .all()
+
     return render_template('numeros.html', qtd_pes = qtd_pes, mda = media_a_pes, des_pes = desvio_padrao_a_pes,
                                            qtd_pts = qtd_pts, 
                                            mda_pts = media, des_pts = desvio_padrao,
-                                           qtd_pts_aval = qtd_pts_aval)
+                                           qtd_pts_aval = qtd_pts_aval,
+                                           qtd_pessoas = qtd_pessoas,
+                                           unids = unids)
 
 @core.route('/graficos')
 def graficos():
@@ -188,6 +247,8 @@ def graficos():
     """
 
     hoje = dt.now()
+
+    # dados de planos de entregas
 
     qtd_pes =  db.session.query(label('pes_total',func.count(planos_entregas.id)),
                                 label('pes_ativ',func.count(case((planos_entregas.status == 'ATIVO',planos_entregas.id)))),
@@ -206,6 +267,8 @@ def graficos():
     rotulos_pes = ['Ativos', 'Incluídos', 'Homologando', 'Concluídos', 'Avaliados', 'Cancelados', 'Suspensos']
     valores_pes = [qtd_pes[0].pes_ativ, qtd_pes[0].pes_incl, qtd_pes[0].pes_homo, qtd_pes[0].pes_conc, qtd_pes[0].pes_aval, qtd_pes[0].pes_canc, qtd_pes[0].pes_susp]
     valores_pes_2 = [qtd_pes[0].pes_ativ_venc, qtd_pes[0].pes_incl_venc, qtd_pes[0].pes_homo_venc, 0, 0, 0, 0]
+
+    # dados de planos de trabalho
 
     qtd_pts =  db.session.query(label('pts_total',func.count(planos_trabalhos.id)),
                                 label('pts_ativ',func.count(case((planos_trabalhos.status == 'ATIVO',planos_trabalhos.id)))),
@@ -235,12 +298,74 @@ def graficos():
     valores_pts = [qtd_pts[0].pts_ativ, qtd_pts[0].pts_incl, qtd_pts[0].pts_agas, qtd_pts[0].pts_conc, qtd_pts[0].pts_canc, qtd_pts[0].pts_susp]
     valores_pts_2 = [qtd_pts[0].pts_ativ_venc, qtd_pts[0].pts_incl_venc, qtd_pts[0].pts_agas_venc, qtd_pts[0].pts_conc - qtd_pts_aval, 0, 0]
 
+    # Dados de Unidades
+
+    chefes_s = db.session.query(Pessoas.id,
+                                unidades_integrantes.unidade_id,
+                                unidades_integrantes_atribuicoes.atribuicao)\
+                         .join(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
+                         .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
+                         .filter(unidades_integrantes_atribuicoes.deleted_at == None,
+                                 unidades_integrantes_atribuicoes.atribuicao == 'GESTOR')\
+                       .distinct().subquery()
+    substitutos_s = db.session.query(Pessoas.id,
+                                   unidades_integrantes.unidade_id,
+                                   unidades_integrantes_atribuicoes.atribuicao)\
+                            .join(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
+                            .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
+                            .filter(unidades_integrantes_atribuicoes.deleted_at == None,
+                                    unidades_integrantes_atribuicoes.atribuicao == 'GESTOR_SUBSTITUTO')\
+                            .distinct().subquery()
+    
+    unidades_s = db.session.query(label('id',Unidades.id),
+                                  label('cont_tit', func.count(distinct(chefes_s.c.id))),
+                                  label('cont_sub', func.count(distinct(substitutos_s.c.id))))\
+                            .outerjoin(chefes_s, chefes_s.c.unidade_id == Unidades.id)\
+                            .outerjoin(substitutos_s, substitutos_s.c.unidade_id == Unidades.id)\
+                            .filter(Unidades.deleted_at == None)\
+                            .group_by(Unidades.id)\
+                            .distinct().subquery()
+                                  
+
+    unids = db.session.query(label('unids_total',func.count(distinct(unidades_s.c.id))),
+                             label('sem_chefe',func.count(case((and_(unidades_s.c.cont_tit == 0, unidades_s.c.cont_sub == 0), unidades_s.c.id)))),
+                             label('sem_titu',func.count(case((unidades_s.c.cont_tit == 0, unidades_s.c.id)))),
+                             label('sem_subs',func.count(case((unidades_s.c.cont_sub == 0, unidades_s.c.id)))))\
+                       .all()
+    
+    rotulos_unids = ['Com alguma chefia', 'Sem Titular e Substituto']
+    valores_unids = [unids[0].unids_total - unids[0].sem_chefe, unids[0].sem_chefe]
+
+    # Dados de Pessoas
+
+    pessoas_subq = db.session.query(Pessoas.id,
+                                     label('qtd_planos_trab',func.count(distinct(planos_trabalhos.id))),
+                                     label('qtd_regramentos',func.count(distinct(programas_participantes.programa_id))))\
+                                .outerjoin(planos_trabalhos, planos_trabalhos.usuario_id == Pessoas.id)\
+                                .outerjoin(programas_participantes, programas_participantes.usuario_id == Pessoas.id)\
+                                .filter(Pessoas.deleted_at == None)\
+                                .group_by(Pessoas.id)\
+                                .subquery()
+
+    qtd_pessoas = db.session.query(label('pessoas_total',func.count(pessoas_subq.c.id)),
+                                   label('com_pt',func.count(case((pessoas_subq.c.qtd_planos_trab != 0,pessoas_subq.c.id)))),
+                                   label('com_regra',func.count(case((pessoas_subq.c.qtd_regramentos != 0,pessoas_subq.c.id)))))\
+                            .all()
+
+    rotulos_pessoas = ['Sem', 'Com']
+    valores_pessoas = [qtd_pessoas[0].pessoas_total - qtd_pessoas[0].com_regra, qtd_pessoas[0].com_regra]
+    valores_pessoas2 = [qtd_pessoas[0].pessoas_total - qtd_pessoas[0].com_pt, qtd_pessoas[0].com_pt]
+
 
     return render_template('graficos.html', qtd_pes = qtd_pes[0][0],
                                             rotulos_pes = rotulos_pes, valores_pes = valores_pes, valores_pes_2 = valores_pes_2,
                                             qtd_pts = qtd_pts[0][0],
                                             rotulos_pts = rotulos_pts, valores_pts = valores_pts, valores_pts_2 = valores_pts_2,
-                                            qtd_pts_aval = qtd_pts_aval)
+                                            qtd_pts_aval = qtd_pts_aval,
+                                            unids = unids,
+                                            rotulos_unids = rotulos_unids, valores_unids = valores_unids,
+                                            qtd_pessoas = qtd_pessoas,
+                                            rotulos_pessoas = rotulos_pessoas, valores_pessoas = valores_pessoas, valores_pessoas2 = valores_pessoas2)
 
 
 @core.route('/dados')

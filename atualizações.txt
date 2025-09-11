@@ -1,5 +1,11 @@
 //# Atualizações ##
 
+11/09/2025
+
+Ajuste na lista de unidades.
+Acréscimo de dados de Unidades e Pessoas em Números e Gráficos.
+v1.0.10
+
 09/09/2025
 
 Correção na geração de csv para planos de entregas.

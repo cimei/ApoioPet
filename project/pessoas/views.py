@@ -76,7 +76,7 @@ def lista_pessoas():
                                      Pessoas.data_nascimento,
                                      Pessoas.matricula,
                                      Pessoas.email,
-                                     Unidades.sigla,
+                                     label('qtd_unidades',func.count(distinct(Unidades.sigla))),
                                      label('atribuicoes',func.count(distinct(unidades_integrantes_atribuicoes.atribuicao))),
                                      Pessoas.situacao_funcional,
                                      label('perfil',perfis.nome),
@@ -90,7 +90,7 @@ def lista_pessoas():
                                 .outerjoin(programas_participantes, programas_participantes.usuario_id == Pessoas.id)\
                                 .filter(Pessoas.deleted_at == None)\
                                 .order_by(Pessoas.nome)\
-                                .group_by(Pessoas.id,Unidades.sigla)\
+                                .group_by(Pessoas.id)\
                                 .paginate(page=page,per_page=pag)
 
     quantidade = pessoas_lista.total
@@ -107,7 +107,7 @@ def lista_pessoas():
                                      Pessoas.data_nascimento,
                                      Pessoas.matricula,
                                      Pessoas.email,
-                                     Unidades.sigla,
+                                     label('qtd_unidades',func.count(distinct(Unidades.sigla))),
                                      label('atribuicoes',func.count(distinct(unidades_integrantes_atribuicoes.atribuicao))),
                                      Pessoas.situacao_funcional,
                                      label('perfil',perfis.nome),
@@ -121,22 +121,25 @@ def lista_pessoas():
                                 .outerjoin(programas_participantes, programas_participantes.usuario_id == Pessoas.id)\
                                 .filter(Pessoas.deleted_at == None)\
                                 .order_by(Pessoas.nome)\
-                                .group_by(Pessoas.id,Unidades.sigla)\
+                                .group_by(Pessoas.id)\
                                 .all()
 
         dados_a_escrever = []
         for p in pessoas_csv:
             atribs = ''
             for a in atribuicoes_pessoas:
-                if a.id == p.id and a.sigla == p.sigla:
+                if a.id == p.id:
                     if a.atribuicao != None:
-                        atribs += (a.atribuicao + ';')
+                        atr = a.atribuicao
+                    else:
+                        atr = 'N.I.'    
+                    atribs += (a.sigla + '(' + atr + ')' + ';')
             atribs = atribs[:-1]        
-            dados_a_escrever.append([p.nome, p.data_nascimento, p.matricula, p.email, p.sigla, atribs, p.situacao_funcional, p.perfil, p.qtd_planos_trab, p.qtd_regramentos])
+            dados_a_escrever.append([p.nome, p.data_nascimento, p.matricula, p.email, atribs, p.situacao_funcional, p.perfil, p.qtd_planos_trab, p.qtd_regramentos])
         
         # dados_a_escrever = [[p.nome, p.data_nascimento, p.matricula, p.email, p.sigla, p.atribuicao, p.situacao_funcional, p.perfil, p.qtd_planos_trab, p.qtd_regramentos] for p in pessoas_csv]
 
-        header = ['Nome', 'Data Nasc.','Matrícula','E-mail', 'Unidade', 'Atribuições', 'Situação', 'Perfil', 'PTs', 'Regramentos']
+        header = ['Nome', 'Data Nascimento','Matrícula','E-mail', 'Unidades (atribuições)', 'Situação', 'Perfil', 'PTs', 'Regramentos']
 
         with open(csv_caminho_arquivo, 'w', newline='') as csvfile:
             csv_writer = csv.writer(csvfile)
@@ -181,6 +184,7 @@ def lista_pessoas_filtro():
                                     .filter(Pessoas.deleted_at == None)\
                                     .order_by(Pessoas.id)\
                                     .distinct().all()
+    
 
     form = PesquisaForm() 
     
@@ -245,7 +249,7 @@ def lista_pessoas_filtro():
                                          Pessoas.data_nascimento,
                                          Pessoas.matricula,
                                          Pessoas.email,
-                                         Unidades.sigla,
+                                         label('qtd_unidades',func.count(distinct(Unidades.sigla))),
                                          label('atribuicoes',func.count(distinct(unidades_integrantes_atribuicoes.atribuicao))),
                                          Pessoas.situacao_funcional,
                                          label('perfil',perfis.nome),
@@ -265,7 +269,7 @@ def lista_pessoas_filtro():
                                           perfis.id.like(p_perf_pattern),
                                           unidades_integrantes_atribuicoes.atribuicao.like(p_atrib_pattern))\
                                   .order_by(Pessoas.nome)\
-                                  .group_by(Pessoas.id,Unidades.sigla)\
+                                  .group_by(Pessoas.id)\
                                   .all()
     
         quantidade = len(pessoas_lista)
@@ -308,6 +312,7 @@ def csv_pessoas_filtro(filtro):
                                     .filter(Pessoas.deleted_at == None)\
                                     .order_by(Pessoas.id)\
                                     .distinct().all()
+    
 
     pessoas_csv_filtro = db.session.query(Pessoas.id,
                                          Pessoas.nome,
@@ -315,7 +320,7 @@ def csv_pessoas_filtro(filtro):
                                          Pessoas.data_nascimento,
                                          Pessoas.matricula,
                                          Pessoas.email,
-                                         Unidades.sigla,
+                                         label('qtd_unidades',func.count(distinct(Unidades.sigla))),
                                          label('atribuicoes',func.count(distinct(unidades_integrantes_atribuicoes.atribuicao))),
                                          Pessoas.situacao_funcional,
                                          label('perfil',perfis.nome),
@@ -335,24 +340,25 @@ def csv_pessoas_filtro(filtro):
                                           perfis.id.like(filtro[3].split("'")[1]),
                                           unidades_integrantes_atribuicoes.atribuicao.like(filtro[4][:-1].split("'")[1]))\
                                   .order_by(Pessoas.nome)\
-                                  .group_by(Pessoas.id,Unidades.sigla)\
+                                  .group_by(Pessoas.id)\
                                   .all()
 
-    csv_caminho_arquivo = os.path.normpath('/app/project/static/pessoas_filtro.csv')
+    csv_caminho_arquivo = os.path.normpath('/app/project/static/pessoas_filtro.csv')    
 
     dados_a_escrever = []
     for p in pessoas_csv_filtro:
         atribs = ''
         for a in atribuicoes_pessoas:
-            if a.id == p.id and a.sigla == p.sigla:
+            if a.id == p.id:
                 if a.atribuicao != None:
-                    atribs += (a.atribuicao + ';')
-        atribs = atribs[:-1]        
-        dados_a_escrever.append([p.nome, p.data_nascimento, p.matricula, p.email, p.sigla, atribs, p.situacao_funcional, p.perfil, p.qtd_planos_trab, p.qtd_regramentos])
+                    atr = a.atribuicao
+                else:
+                    atr = 'N.I.'    
+                atribs += (a.sigla + '(' + atr + ')' + ';')
+        atribs = atribs[:-1]    
+        dados_a_escrever.append([p.nome, p.data_nascimento, p.matricula, p.email, atribs, p.situacao_funcional, p.perfil, p.qtd_planos_trab, p.qtd_regramentos])
     
-    # dados_a_escrever = [[p.nome, p.data_nascimento, p.matricula, p.email, p.sigla, p.atribuicao, p.situacao_funcional, p.perfil, p.qtd_planos_trab, p.qtd_regramentos] for p in pessoas_csv_filtro]
-
-    header = ['Nome', 'Data Nasc.','Matrícula','E-mail', 'Unidade', 'Atribuições', 'Situação', 'Perfil', 'PTs', 'Regramentos']
+    header = ['Nome', 'Data Nascimento','Matrícula','E-mail', 'Unidades (atribuições)', 'Situação', 'Perfil', 'PTs', 'Regramentos']
 
     with open(csv_caminho_arquivo, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)

@@ -82,8 +82,8 @@ PGD Petrvs de sua instituição, me avise que eu irei buscar a correção.
  ![alt text](image-1.png)
 
  * Números
-![alt text](image-2.png)
+![alt text](image.png)
 
  * Gráficos
- ![alt text](image.png)
+![alt text](image-2.png)
 ...

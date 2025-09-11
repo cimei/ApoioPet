@@ -81,14 +81,14 @@
         <thead>
           <tr>
             <th scope="col"><p align = "center">#</p></th>
-            <th scope="col" data-sortable="true"><p align = "center">Nome</p></th>
+            <th scope="col" data-field="nome" data-filter-control="input" data-sortable="true"><p align = "center">Nome</p></th>
             <th scope="col" data-sortable="true"><p align = "center">Data Nasc.</p></th>
             <th scope="col" data-sortable="true"><p align = "center">Mat.</p></th>
             <th scope="col" data-sortable="true"><p align = "center">E-mail</p></th>
-            <th scope="col" data-field="undSigla" data-filter-control="input" data-sortable="true"><p align = "center">Unidade</p></th>
-            <th scope="col" data-field="tfnDescricao" data-filter-control="input" data-sortable="true"><p align = "center">Atribuição</p></th>
-            <th scope="col" data-field="spsDescricao" data-filter-control="input" data-sortable="true"><p align = "center">Situação</p></th>
-            <th scope="col" data-field="tvnDescricao" data-filter-control="input" data-sortable="true"><p align = "center">Perfil</p></th>
+            {# <th scope="col" data-field="undSigla" data-filter-control="input" data-sortable="true"><p align = "center">Unidade</p></th> #}
+            <th scope="col"><p align = "center">Unidades (atrib)</p></th>
+            <th scope="col" data-field="situacao_funcional" data-filter-control="input" data-sortable="true"><p align = "center">Situação</p></th>
+            <th scope="col" data-field="perfil" data-filter-control="input" data-sortable="true"><p align = "center">Perfil</p></th>
             <th scope="col" data-sortable="true"><p align = "center">PTs</p></th>
             <th scope="col" data-sortable="true"><p align = "center">Regr.</p></th>
           </tr>
@@ -102,26 +102,32 @@
             <td><p align = "center"> {% if p.data_nascimento == None or p.data_nascimento == '' %}N.I.{% else %}{{p.data_nascimento.strftime('%d/%m/%Y')}}{%endif%} </p></td>
             <td><p align = "center"> {{p.matricula}} </p></td>
             <td><p align = "center"> {% if p.email == None %}N.I.{% else %}{{p.email}}{% endif %} </p></td>
-            <td><p align = "center"> {% if p.sigla == None %}N.I.{% else %}{{p.sigla}}{% endif %} </p></td>
+            {# <td><p align = "center"> {% if p.sigla == None %}N.I.{% else %}{{p.sigla}}{% endif %} </p></td> #}
             <td><p align = "center"> 
               {% if p.atribuicoes != None and p.atribuicoes != 0 %}
 
-                <a href="#" data-bs-toggle='modal' data-bs-target='#atribuicoes_modal{{p.id}}{{p.sigla}}'> {{p.atribuicoes}} </a></abbr>
+                <a href="#" data-bs-toggle='modal' data-bs-target='#atribuicoes_modal{{p.id}}'> {{p.qtd_unidades}} </a></abbr>
           
-                  {# modal visualização das atribuições de uma pessoa #}
-                  <div class="modal fade" tabindex="-1" role="dialog" id="atribuicoes_modal{{p.id}}{{p.sigla}}">
+                  {# modal visualização das unidades e atribuições de uma pessoa #}
+                  <div class="modal fade" tabindex="-1" role="dialog" id="atribuicoes_modal{{p.id}}">
                     <div class="modal-dialog" role="document">
                       <div class="modal-content">
                         <div class="modal-header">
-                          <h4 class="modal-title">Atribuições de {{ p.nome }} em {{ p.sigla }}</h4>
+                          <h4 class="modal-title">Unidade(s) de {{ p.nome }}</h4>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                           <ul class="small list-group">
                             {% for a in atribuicoes_pessoas %}
-                              {% if a.id == p.id and a.sigla == p.sigla %}
+                              {% if a.id == p.id %}
                                 <li class="list-group-item">
-                                  <p><b>{{ a.atribuicao }}</b></p>
+                                  <p><b>{{a.sigla}}</b> 
+                                    {% if a.atribuicao == None %}
+                                      ( N.I. )
+                                    {% else %}
+                                      ({{ a.atribuicao }})
+                                    {% endif %}
+                                   </p>
                                 </li>  
                               {% endif %}
                             {% endfor %}
