@@ -65,6 +65,8 @@
             <th scope="col" data-field="perfil" data-filter-control="input" data-sortable="true"><p align = "center">Perfil</p></th>
             <th scope="col" data-sortable="true"><p align = "center">PTs</p></th>
             <th scope="col" data-sortable="true"><p align = "center">Regr.</p></th>
+            <th scope="col" data-sortable="true"><p align = "center">PGD SIAPE</p></th>
+
           </tr>
         </thead>
         <tbody>
@@ -145,6 +147,12 @@
               {% else %}
                 <a style="text-decoration: none" href="{{url_for('pessoas.regramentos_pessoa',pessoa_id=p.id)}}" class="btn btn-outline-success btn-sm" role="button" aria-pressed="true">
                   {{p.qtd_regramentos}}</a>
+              {% endif %}
+            </p></td>
+
+            <td><p align = "center"> {{p.participa_pgd}}
+              {% if p.modalidade_pgd != None%}
+               - {{p.modalidade_pgd}}
               {% endif %}
             </p></td>
 

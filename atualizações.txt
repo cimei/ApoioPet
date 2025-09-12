@@ -1,5 +1,9 @@
 //# Atualizações ##
 
+12/09/2025
+Inclsão de informções do SIAPE sobre PGD na lista de pessoas.
+v1.0.11
+
 11/09/2025
 
 Ajuste na lista de unidades.

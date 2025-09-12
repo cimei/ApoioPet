@@ -23,7 +23,7 @@ from sqlalchemy import func, distinct
 from project import db
 from project.models import Unidades, unidades_integrantes, Pessoas, perfis, unidades_integrantes_atribuicoes, planos_trabalhos,\
                            planos_trabalhos_entregas, planos_entregas_entregas, tipos_modalidades, planos_trabalhos_consolidacoes,\
-                           avaliacoes, programas_participantes, programas
+                           avaliacoes, programas_participantes, programas, tipos_modalidades_siape
                             
 from project.pessoas.forms import PesquisaForm, CSV_Form
 
@@ -81,13 +81,16 @@ def lista_pessoas():
                                      Pessoas.situacao_funcional,
                                      label('perfil',perfis.nome),
                                      label('qtd_planos_trab',func.count(distinct(planos_trabalhos.id))),
-                                     label('qtd_regramentos',func.count(distinct(programas_participantes.programa_id))))\
+                                     label('qtd_regramentos',func.count(distinct(programas_participantes.programa_id))),
+                                     Pessoas.participa_pgd,
+                                     label('modalidade_pgd',tipos_modalidades_siape.nome))\
                                 .outerjoin(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
                                 .outerjoin(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                                 .outerjoin(Unidades, Unidades.id == unidades_integrantes.unidade_id)\
                                 .join(perfis, perfis.id == Pessoas.perfil_id)\
                                 .outerjoin(planos_trabalhos, planos_trabalhos.usuario_id == Pessoas.id)\
                                 .outerjoin(programas_participantes, programas_participantes.usuario_id == Pessoas.id)\
+                                .outerjoin(tipos_modalidades_siape, tipos_modalidades_siape.id == Pessoas.modalidade_pgd)\
                                 .filter(Pessoas.deleted_at == None)\
                                 .order_by(Pessoas.nome)\
                                 .group_by(Pessoas.id)\
@@ -112,13 +115,16 @@ def lista_pessoas():
                                      Pessoas.situacao_funcional,
                                      label('perfil',perfis.nome),
                                      label('qtd_planos_trab',func.count(distinct(planos_trabalhos.id))),
-                                     label('qtd_regramentos',func.count(distinct(programas_participantes.programa_id))))\
+                                     label('qtd_regramentos',func.count(distinct(programas_participantes.programa_id))),
+                                     Pessoas.participa_pgd,
+                                     label('modalidade_pgd',tipos_modalidades_siape.nome))\
                                 .outerjoin(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
                                 .outerjoin(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                                 .outerjoin(Unidades, Unidades.id == unidades_integrantes.unidade_id)\
                                 .join(perfis, perfis.id == Pessoas.perfil_id)\
                                 .outerjoin(planos_trabalhos, planos_trabalhos.usuario_id == Pessoas.id)\
                                 .outerjoin(programas_participantes, programas_participantes.usuario_id == Pessoas.id)\
+                                .outerjoin(tipos_modalidades_siape, tipos_modalidades_siape.id == Pessoas.modalidade_pgd)\
                                 .filter(Pessoas.deleted_at == None)\
                                 .order_by(Pessoas.nome)\
                                 .group_by(Pessoas.id)\
@@ -135,11 +141,11 @@ def lista_pessoas():
                         atr = 'N.I.'    
                     atribs += (a.sigla + '(' + atr + ')' + ';')
             atribs = atribs[:-1]        
-            dados_a_escrever.append([p.nome, p.data_nascimento, p.matricula, p.email, atribs, p.situacao_funcional, p.perfil, p.qtd_planos_trab, p.qtd_regramentos])
+            dados_a_escrever.append([p.nome, p.data_nascimento, p.matricula, p.email, atribs, p.situacao_funcional, p.perfil, p.qtd_planos_trab, p.qtd_regramentos, p.participa_pgd, p.modalidade_pgd])
         
         # dados_a_escrever = [[p.nome, p.data_nascimento, p.matricula, p.email, p.sigla, p.atribuicao, p.situacao_funcional, p.perfil, p.qtd_planos_trab, p.qtd_regramentos] for p in pessoas_csv]
 
-        header = ['Nome', 'Data Nascimento','Matrícula','E-mail', 'Unidades (atribuições)', 'Situação', 'Perfil', 'PTs', 'Regramentos']
+        header = ['Nome', 'Data Nascimento','Matrícula','E-mail', 'Unidades (atribuições)', 'Situação', 'Perfil', 'PTs', 'Regramentos', 'Participa PGD', 'Modalidade PGD']
 
         with open(csv_caminho_arquivo, 'w', newline='') as csvfile:
             csv_writer = csv.writer(csvfile)
@@ -255,13 +261,16 @@ def lista_pessoas_filtro():
                                          label('perfil',perfis.nome),
                                          label('perfil_id',perfis.id),
                                          label('qtd_planos_trab',func.count(distinct(planos_trabalhos.id))),
-                                         label('qtd_regramentos',func.count(distinct(programas_participantes.programa_id))))\
+                                         label('qtd_regramentos',func.count(distinct(programas_participantes.programa_id))),
+                                         Pessoas.participa_pgd,
+                                         label('modalidade_pgd',tipos_modalidades_siape.nome))\
                                   .outerjoin(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
                                   .outerjoin(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                                   .outerjoin(Unidades, Unidades.id == unidades_integrantes.unidade_id)\
                                   .join(perfis, perfis.id == Pessoas.perfil_id)\
                                   .outerjoin(planos_trabalhos, planos_trabalhos.usuario_id == Pessoas.id)\
                                   .outerjoin(programas_participantes, programas_participantes.usuario_id == Pessoas.id)\
+                                  .outerjoin(tipos_modalidades_siape, tipos_modalidades_siape.id == Pessoas.modalidade_pgd)\
                                   .filter(Pessoas.deleted_at == None,
                                           Pessoas.nome.like('%'+nome_pesq+'%'),
                                           Unidades.id.like(p_unid_pattern),
@@ -326,13 +335,16 @@ def csv_pessoas_filtro(filtro):
                                          label('perfil',perfis.nome),
                                          label('perfil_id',perfis.id),
                                          label('qtd_planos_trab',func.count(distinct(planos_trabalhos.id))),
-                                         label('qtd_regramentos',func.count(distinct(programas_participantes.programa_id))))\
+                                         label('qtd_regramentos',func.count(distinct(programas_participantes.programa_id))),
+                                         Pessoas.participa_pgd,
+                                         label('modalidade_pgd',tipos_modalidades_siape.nome))\
                                   .outerjoin(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
                                   .outerjoin(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                                   .outerjoin(Unidades, Unidades.id == unidades_integrantes.unidade_id)\
                                   .join(perfis, perfis.id == Pessoas.perfil_id)\
                                   .outerjoin(planos_trabalhos, planos_trabalhos.usuario_id == Pessoas.id)\
                                   .outerjoin(programas_participantes, programas_participantes.usuario_id == Pessoas.id)\
+                                  .outerjoin(tipos_modalidades_siape, tipos_modalidades_siape.id == Pessoas.modalidade_pgd)\
                                   .filter(Pessoas.deleted_at == None,
                                           Pessoas.nome.like('%'+filtro[0][1:].split("'")[1]+'%'),
                                           Unidades.id.like(filtro[1].split("'")[1]),
@@ -356,9 +368,9 @@ def csv_pessoas_filtro(filtro):
                     atr = 'N.I.'    
                 atribs += (a.sigla + '(' + atr + ')' + ';')
         atribs = atribs[:-1]    
-        dados_a_escrever.append([p.nome, p.data_nascimento, p.matricula, p.email, atribs, p.situacao_funcional, p.perfil, p.qtd_planos_trab, p.qtd_regramentos])
+        dados_a_escrever.append([p.nome, p.data_nascimento, p.matricula, p.email, atribs, p.situacao_funcional, p.perfil, p.qtd_planos_trab, p.qtd_regramentos, p.participa_pgd, p.modalidade_pgd])
     
-    header = ['Nome', 'Data Nascimento','Matrícula','E-mail', 'Unidades (atribuições)', 'Situação', 'Perfil', 'PTs', 'Regramentos']
+    header = ['Nome', 'Data Nascimento','Matrícula','E-mail', 'Unidades (atribuições)', 'Situação', 'Perfil', 'PTs', 'Regramentos', 'Participa PGD', 'Modalidade PGD']
 
     with open(csv_caminho_arquivo, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
