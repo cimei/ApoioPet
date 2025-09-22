@@ -117,7 +117,8 @@ def lista_unidades():
                              Unidades.codigo,
                              label('titular',func.count(distinct(chefes_s.c.nome))),
                              label('substituto',func.count(distinct(substitutos_s.c.nome))),
-                             label('delegado',func.count(distinct(delegados_s.c.nome))))\
+                             label('delegado',func.count(distinct(delegados_s.c.nome))),
+                             Unidades.data_inativacao)\
                         .outerjoin(cidades, cidades.id == Unidades.cidade_id)\
                         .outerjoin(chefes_s, chefes_s.c.unidade_id == Unidades.id)\
                         .outerjoin(substitutos_s, substitutos_s.c.unidade_id == Unidades.id)\
@@ -159,7 +160,8 @@ def lista_unidades():
                                      Unidades.codigo,
                                      label('titular',func.count(distinct(chefes_s.c.nome))),
                                      label('substituto',func.count(distinct(substitutos_s.c.nome))),
-                                     label('delegado',func.count(distinct(delegados_s.c.nome))))\
+                                     label('delegado',func.count(distinct(delegados_s.c.nome))),
+                                     Unidades.data_inativacao)\
                         .outerjoin(cidades, cidades.id == Unidades.cidade_id)\
                         .outerjoin(chefes_s, chefes_s.c.unidade_id == Unidades.id)\
                         .outerjoin(substitutos_s, substitutos_s.c.unidade_id == Unidades.id)\
@@ -172,9 +174,9 @@ def lista_unidades():
 
         csv_caminho_arquivo = os.path.normpath('/app/project/static/unidades.csv')
         
-        dados_a_escrever = [[caminho_dict[u.id], u.nome, u.sigla, u.codigo, u.titular, u.substituto, u.delegado] for u in unids_csv]
+        dados_a_escrever = [[caminho_dict[u.id], u.nome, u.sigla, u.codigo, u.titular, u.substituto, u.delegado, u.data_inativacao] for u in unids_csv]
 
-        header = ['Hierarquia', 'Nome','Sigla','UF', 'Código', 'Gestor', 'Substituto', 'Delegado']
+        header = ['Hierarquia', 'Nome','Sigla','UF', 'Código', 'Gestor', 'Substituto', 'Delegado', 'Data de Inativação']
 
         with open(csv_caminho_arquivo, 'w', newline='') as csvfile:
             csv_writer = csv.writer(csvfile)
@@ -313,7 +315,8 @@ def lista_unidades_filtro(lista):
                                  Unidades.codigo,
                                  label('titular',func.count(distinct(chefes_s.c.nome))),
                                  label('substituto',func.count(distinct(substitutos_s.c.nome))),
-                                 label('delegado',func.count(distinct(delegados_s.c.nome))))\
+                                 label('delegado',func.count(distinct(delegados_s.c.nome))),
+                                 Unidades.data_inativacao)\
                            .outerjoin(cidades, cidades.id == Unidades.cidade_id)\
                            .outerjoin(chefes_s, chefes_s.c.unidade_id == Unidades.id)\
                            .outerjoin(substitutos_s, substitutos_s.c.unidade_id == Unidades.id)\
@@ -411,7 +414,8 @@ def csv_lista_unidades_filtro(filtro):
                                 Unidades.codigo,
                                 label('titular',func.count(distinct(chefes_s.c.nome))),
                                 label('substituto',func.count(distinct(substitutos_s.c.nome))),
-                                label('delegado',func.count(distinct(delegados_s.c.nome))))\
+                                label('delegado',func.count(distinct(delegados_s.c.nome))),
+                                Unidades.data_inativacao)\
                         .outerjoin(cidades, cidades.id == Unidades.cidade_id)\
                         .outerjoin(chefes_s, chefes_s.c.unidade_id == Unidades.id)\
                         .outerjoin(substitutos_s, substitutos_s.c.unidade_id == Unidades.id)\
@@ -443,9 +447,9 @@ def csv_lista_unidades_filtro(filtro):
 
     csv_caminho_arquivo = os.path.normpath('/app/project/static/unidades_filtro.csv')
         
-    dados_a_escrever = [[caminho_dict[u.id], u.nome, u.sigla, u.codigo, u.titular, u.substituto, u.delegado] for u in unids_csv]
+    dados_a_escrever = [[caminho_dict[u.id], u.nome, u.sigla, u.codigo, u.titular, u.substituto, u.delegado, u.data_inativacao] for u in unids_csv]
 
-    header = ['Hierarquia', 'Nome','Sigla','UF', 'Código', 'Gestor', 'Substituto', 'Delegado']
+    header = ['Hierarquia', 'Nome','Sigla','UF', 'Código', 'Gestor', 'Substituto', 'Delegado', 'Data de Inativação']
 
     with open(csv_caminho_arquivo, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)

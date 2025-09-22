@@ -1,5 +1,9 @@
 //# Atualizações ##
 
+22/09/2025
+Grifo, na lista de unidades, nas unidades que possuem data de inativação associada.
+v1.0.12
+
 12/09/2025
 Inclsão de informções do SIAPE sobre PGD na lista de pessoas.
 v1.0.11

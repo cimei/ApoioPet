@@ -92,8 +92,20 @@
         <tr>
           <th scope="row"> <p align = "center">{{(unids.page - 1) * unids.per_page + unids.items.index(u) + 1}} </a> </p></th>
           <td><p align = "center"> {{caminho_dict[u.id]}} </p></td>
-          <td><p align = "center"> {{u.nome}} </p></td>
-          <td><p align = "center"> {{u.sigla}} </p></td>
+          <td><p align = "center"> 
+            {% if u.data_inativacao != None and u.data_inativacao != '' %}
+             <span class="text-danger" title="Consta data de inativação: {{u.data_inativacao.strftime('%d/%m/%Y')}}.">{{u.nome}}</span> 
+            {% else %}
+              {{u.nome}}
+            {% endif %} 
+          </p></td>
+          <td><p align = "center"> 
+            {% if u.data_inativacao != None and u.data_inativacao != '' %}
+             <span class="text-danger" title="Consta data de inativação: {{u.data_inativacao.strftime('%d/%m/%Y')}}">{{u.sigla}} </span> 
+            {% else %}
+              {{u.sigla}} 
+            {% endif %}
+          </p></td>
           <td><p align = "center"> {{u.uf}} </p></td>
           <td><p align = "center"> {{u.codigo}} </p></td>
 
