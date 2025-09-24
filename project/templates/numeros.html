@@ -169,8 +169,16 @@
             </div> 
 
             <div class="card-footer text-body-secondary">
-              <p><b><span style="font-size: 20px;">Índice de avaliação:</span></b> <span class="br-tag bg-violet-warm-vivid-70" title = "Uma relação entre avaliados e pendentes de avaliação. Próximo a zero é ruim, próximo a 1 é bom.">{{(q.pes_aval/(q.pes_ativ_venc + q.pes_conc + q.pes_aval))|decimal_com_virgula(1)}}</span></p>
-              <p><b><span style="font-size: 20px;">Média de dias até a avaliação:</span></b> <span class="br-tag bg-violet-warm-vivid-70" title = "A avaliação de um Plano de Entregas deveria acontecer em até 30 dias do seu término.">{{mda |decimal_com_virgula(1)}}  &plusmn; {{des_pes|decimal_com_virgula(1)}}</span></p>
+              <p><b><span style="font-size: 20px;">Índice de avaliação:</span></b> <span class="br-tag bg-violet-warm-vivid-70" title = "Uma relação entre avaliados e pendentes de avaliação. Próximo a zero é ruim, próximo a 1 é bom.">
+                      {% if (q.pes_ativ_venc + q.pes_conc + q.pes_aval) != 0 %}
+                        {{(q.pes_aval/(q.pes_ativ_venc + q.pes_conc + q.pes_aval))|decimal_com_virgula(1)}}
+                      {% else %}
+                        0
+                      {% endif %}</span>
+              </p>
+              <p><b><span style="font-size: 20px;">Média de dias até a avaliação:</span></b> <span class="br-tag bg-violet-warm-vivid-70" title = "A avaliação de um Plano de Entregas deveria acontecer em até 30 dias do seu término.">
+                {{mda |decimal_com_virgula(1)}}  &plusmn; {{des_pes|decimal_com_virgula(1)}}</span>
+              </p>
 
             </div>
 
@@ -257,8 +265,16 @@
 
             <div class="card-footer text-body-secondary">
               
-              <p><b><span style="font-size: 20px;">Índice de avaliação:</span></b> <span class="br-tag bg-violet-warm-vivid-70" title = "Uma relação entre avaliados e pendentes de avaliação. Próximo a zero é ruim, próximo a 1 é bom.">{{(qtd_pts_aval/(q.pts_ativ_venc + q.pts_conc))|decimal_com_virgula(1)}}</span></p>
-              <p><b><span style="font-size: 20px;">Média de dias entre registro e avaliação: </span></b><span class="br-tag bg-violet-warm-vivid-70" title = "A avaliação de um Plano de Trabalho deveria acontecer em até 20 dias após a data limite do registro feito pelo participante.">{{ mda_pts|decimal_com_virgula(1)}} &plusmn; {{des_pts|decimal_com_virgula(1)}}</span></p>
+              <p><b><span style="font-size: 20px;">Índice de avaliação:</span></b> <span class="br-tag bg-violet-warm-vivid-70" title = "Uma relação entre avaliados e pendentes de avaliação. Próximo a zero é ruim, próximo a 1 é bom.">
+                {% if (q.pts_ativ_venc + q.pts_conc) != 0 %}
+                  {{(qtd_pts_aval/(q.pts_ativ_venc + q.pts_conc))|decimal_com_virgula(1)}}</span></p>
+                {% else %}
+                  0
+                {% endif %}</span>
+              </p>
+              <p><b><span style="font-size: 20px;">Média de dias entre registro e avaliação: </span></b><span class="br-tag bg-violet-warm-vivid-70" title = "A avaliação de um Plano de Trabalho deveria acontecer em até 20 dias após a data limite do registro feito pelo participante.">
+                {{ mda_pts|decimal_com_virgula(1)}} &plusmn; {{des_pts|decimal_com_virgula(1)}}</span>
+              </p>
               
             </div>
 

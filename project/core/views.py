@@ -134,9 +134,13 @@ def numeros():
   
     dados = [ a.dif_datas for a in avaliacoes_dados if a.dif_datas != None and a.dif_datas > 0 ]
     n = len(dados)
-    media_a_pes = sum(dados) / n
-    variancia_a_pes = sum([(x - media_a_pes) ** 2 for x in dados]) / n  # Para desvio padrão populacional
-    desvio_padrao_a_pes = variancia_a_pes ** 0.5
+    if n != 0:
+        media_a_pes = sum(dados) / n
+        variancia_a_pes = sum([(x - media_a_pes) ** 2 for x in dados]) / n  # Para desvio padrão populacional
+        desvio_padrao_a_pes = variancia_a_pes ** 0.5
+    else:
+        media_a_pes = 0
+        desvio_padrao_a_pes = 0
 
     # Dados de Planos de Trabalho
     
@@ -175,9 +179,13 @@ def numeros():
 
     dados = [ a.dif_datas for a in avaliacoes_pt if a.dif_datas != None and a.dif_datas > 0 ]
     n = len(dados)
-    media = sum(dados) / n
-    variancia = sum([(x - media) ** 2 for x in dados]) / n  # Para desvio padrão populacional
-    desvio_padrao = variancia ** 0.5  
+    if n != 0:
+        media = sum(dados) / n
+        variancia = sum([(x - media) ** 2 for x in dados]) / n  # Para desvio padrão populacional
+        desvio_padrao = variancia ** 0.5
+    else:
+        media = 0
+        desvio_padrao = 0  
 
     # Dados de Pessoas
 
