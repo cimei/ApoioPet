@@ -174,9 +174,9 @@ def lista_unidades():
 
         csv_caminho_arquivo = os.path.normpath('/app/project/static/unidades.csv')
         
-        dados_a_escrever = [[caminho_dict[u.id], u.nome, u.sigla, u.codigo, u.titular, u.substituto, u.delegado, u.data_inativacao] for u in unids_csv]
+        dados_a_escrever = [[caminho_dict[u.id], u.nome, u.sigla, u.uf, u.codigo, u.titular, u.substituto, u.delegado, u.data_inativacao] for u in unids_csv]
 
-        header = ['Hierarquia', 'Nome','Sigla','UF', 'Código', 'Gestor', 'Substituto', 'Delegado', 'Data de Inativação']
+        header = ['Hierarquia', 'Nome','Sigla','UF', 'Código', 'Titular', 'Substituto', 'Delegado', 'Data de Inativação']
 
         with open(csv_caminho_arquivo, 'w', newline='') as csvfile:
             csv_writer = csv.writer(csvfile)
@@ -447,9 +447,9 @@ def csv_lista_unidades_filtro(filtro):
 
     csv_caminho_arquivo = os.path.normpath('/app/project/static/unidades_filtro.csv')
         
-    dados_a_escrever = [[caminho_dict[u.id], u.nome, u.sigla, u.codigo, u.titular, u.substituto, u.delegado, u.data_inativacao] for u in unids_csv]
+    dados_a_escrever = [[caminho_dict[u.id], u.nome, u.sigla, u.uf, u.codigo, u.titular, u.substituto, u.delegado, u.data_inativacao] for u in unids_csv]
 
-    header = ['Hierarquia', 'Nome','Sigla','UF', 'Código', 'Gestor', 'Substituto', 'Delegado', 'Data de Inativação']
+    header = ['Hierarquia', 'Nome','Sigla','UF', 'Código', 'Titular', 'Substituto', 'Delegado', 'Data de Inativação']
 
     with open(csv_caminho_arquivo, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)

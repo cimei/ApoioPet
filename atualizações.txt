@@ -1,5 +1,9 @@
 //# Atualizações ##
 
+25/09/2025
+Correção no csv de unidades.
+v1.0.14
+
 24/09/2025
 Correção na consulta a Entregas e PTs em registros da lista de Planos de Entregas.
 v1.0.13
