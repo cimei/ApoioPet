@@ -92,14 +92,66 @@
         <tr>
           <th scope="row"> <p align = "center">{{(unids.page - 1) * unids.per_page + unids.items.index(u) + 1}} </a> </p></th>
           <td><p align = "center"> {{caminho_dict[u.id]}} </p></td>
-          <td><p align = "center"> {{u.nome}} </p></td>
-          <td><p align = "center"> {{u.sigla}} </p></td>
+          <td><p align = "center"> 
+            {% if u.data_inativacao != None and u.data_inativacao != '' %}
+             <span class="text-danger" title="Consta data de inativação: {{u.data_inativacao.strftime('%d/%m/%Y')}}.">{{u.nome}}</span> 
+            {% else %}
+              {{u.nome}}
+            {% endif %} 
+          </p></td>
+          <td><p align = "center"> 
+            {% if u.data_inativacao != None and u.data_inativacao != '' %}
+             <span class="text-danger" title="Consta data de inativação: {{u.data_inativacao.strftime('%d/%m/%Y')}}">{{u.sigla}} </span> 
+            {% else %}
+              {{u.sigla}} 
+            {% endif %}
+          </p></td>
           <td><p align = "center"> {{u.uf}} </p></td>
           <td><p align = "center"> {{u.codigo}} </p></td>
 
-          <td><p align = "center"> {% if u.titular == None or u.titular == '' %}N.I.{% else %}{{u.titular}}{% endif %} </p></td>
+          {% if u.titular > 1 %}
+          <td><p align = "center"> 
+            
+            <a href="#" data-bs-toggle='modal' data-bs-target='#titular_modal{{u.id}}'> {{u.titular}} </a></abbr>
+          
+            {# modal visualização dos gestores titulares #}
+            <div class="modal fade" tabindex="-1" role="dialog" id="titular_modal{{u.id}}">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h4 class="modal-title">Gestores titulares para {{ u.sigla }}</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <ul class="small list-group">
+                      {% for g in chefes %}
+                        {% if g.unidade_id == u.id %}
+                          <li class="list-group-item">
+                            <p><b>{{ g.nome }}</b></p>
+                          </li>  
+                        {% endif %}
+                      {% endfor %}
+                    </ul>
+                  </div>
+                  <div class="modal-footer">
+                  </div>
+                </div>
+              </div>
+            </div>
 
-          {# <td><p align = "center"> {% if u.substituto == None or u.substituto == '' %}N.I.{% else %}{{u.substituto}}{% endif %} </p></td> #}
+
+          </p></td>
+          {% elif u.titular == 1 %}
+              <td><p align = "center">
+                {% for g in chefes %}
+                  {% if g.unidade_id == u.id %}
+                    {{ g.nome }}
+                  {% endif %}
+                {% endfor %}
+              </p></td>
+          {% else %}    
+              <td><p align = "center">N.I.</p></td>
+          {% endif%}
 
           {% if u.substituto > 1 %}
           <td><p align = "center">
@@ -143,9 +195,6 @@
           {% else %}    
               <td><p align = "center">N.I.</p></td>
           {% endif%}
-
-
-          {# <td><p align = "center"> {% if u.delegado == None or u.delegado == '' %}N.I.{% else %}{{u.delegado}}{% endif %} </p></td> #}
 
           {% if u.delegado > 1 %}
           <td><p align = "center">

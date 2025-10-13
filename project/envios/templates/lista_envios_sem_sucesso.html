@@ -22,7 +22,7 @@
 <div class="jumbotron">
 
   <div class="row">
-    <div class="col-10">
+    <div class="col-6">
       <h4>
         {% if tipo == 'par' %}
           Participantes com problema no envio
@@ -34,7 +34,13 @@
       </h4>
     </div>
 
-    <div class="col-2">
+    <div class="col-5">
+
+      <h4>Data de referência: <b>{{data_ref.strftime('%d/%m/%Y')}}</b></h4>
+
+    </div>
+
+    <div class="col-1">
 
       <form class="needs-validation" method='POST' >
 
@@ -55,7 +61,7 @@
   <caption>
     <div class="row">
         <div class="col-8">
-          <p>Lista de <b>{{quantidade}}</b> itens. 
+          <p>Lista de <b>{{quantidade}}</b> itens de um total de <b>{{qtd_envios_sem_sucesso_total}}</b> 
         </div>
     </div>
   </caption>

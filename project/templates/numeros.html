@@ -1,0 +1,293 @@
+{% extends "template_gov.html" %}
+{% block content %}
+
+<div class="col mb-5">
+  <div class="br-breadcrumb">
+    <ul class="crumb-list">
+      <li class="crumb home"><a class="br-button circle" href="{{url_for('core.inicio')}}"><span class="sr-only">Página inicial</span><i class="fa fa-home"></i></a></li>
+      <li class="crumb"><i class="icon fa fa-chevron-right"></i><a href="{{url_for('core.dados')}}">Dados Agregados</a></li>
+      <li class="crumb" data-active="active"><i class="icon fa fa-chevron-right"></i><span>Números</span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="container">
+  <div class="jumbotron">
+
+    <div class = "row">
+
+      <div class="col">
+
+        <div class="card card border-secondary">
+            {% for u in unids %}
+            <div class="card-header">
+              <h4> <span class="br-tag bg-secondary" title="">{{u.unids_total|decimal_com_virgula(0)}} </span> Unidades </h4>
+            </div>
+
+            <div class="card-body">
+              
+              <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;Sem Tilular</b> <span>
+                    <span class="br-tag count bg-secondary" title="">{{u.sem_titu|decimal_com_virgula(0)}} </span>
+                    <span class="br-tag count bg-secondary" title="% sobre a quantidade total de Unidades">{{ (100 * u.sem_titu / u.unids_total)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;Sem Substituto</b> <span>
+                  <span class="br-tag count bg-secondary" title="">{{ u.sem_subs|decimal_com_virgula(0)}}</span>
+                  <span class="br-tag count bg-secondary" title="% sobre a quantidade total de Unidades">{{ (100 * u.sem_subs / u.unids_total)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;Sem os dois</b> <span>
+                  <span class="br-tag count bg-secondary" title="">{{ u.sem_chefe|decimal_com_virgula(0)}}</span>
+                  <span class="br-tag count bg-secondary" title="% sobre a quantidade total de Unidades">{{ (100 * u.sem_chefe / u.unids_total)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+              </ul>  
+            
+            </div> 
+
+            {% endfor %}
+          </div>
+
+      </div>
+
+      <div class="col">
+
+          <div class="card card border-secondary">
+            {% for q in qtd_pessoas %}
+            <div class="card-header">
+              <h4> <span class="br-tag bg-secondary" title="">{{q.pessoas_total|decimal_com_virgula(0)}} </span> Pessoas </h4>
+            </div>
+
+            <div class="card-body">
+              
+              <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;Com Regramento</b> <span>
+                    <span class="br-tag count bg-secondary" title="">{{q.com_regra|decimal_com_virgula(0)}} </span>
+                    <span class="br-tag count bg-secondary" title="% sobre a quantidade total de Pessoas">{{ (100 * q.com_regra / q.pessoas_total)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;&emsp;&emsp;&emsp;&emsp;Com Plano(s) de Trabalho</b> <span>
+                  <span class="br-tag count bg-warning" title="">{{q.com_pt|decimal_com_virgula(0)}}</span>
+                  <span class="br-tag count bg-warning" title="% sobre a quantidade de pessoas com regramento">{{ (100 * q.com_pt / q.com_regra)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+              </ul>  
+            
+            </div> 
+
+            {% endfor %}
+          </div>         
+
+      </div>
+
+    </div>
+
+    <p></p>
+
+    <div class="row">
+
+      <div class="col">
+
+          <div class="card card border-secondary">
+            {% for q in qtd_pes %}
+            <div class="card-header">
+              <h4> <span class="br-tag bg-secondary" title="">{{q.pes_total|decimal_com_virgula(0)}} </span> Planos de Entregas </h4>
+            </div>
+
+            <div class="card-body">
+              
+              <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;Ativos</b> <span>
+                    <span class="br-tag count bg-secondary" title="">{{q.pes_ativ|decimal_com_virgula(0)}} </span>
+                    <span class="br-tag count bg-secondary" title="% sobre o total de Planos de Entregas">{{ (100 * q.pes_ativ / q.pes_total)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  &emsp;<a href="{{url_for('entregas.lista_pe', tipo='ativ_venc')}}">Vencidos</a> <span>
+                    <span class="br-tag count bg-warning" title="">{{q.pes_ativ_venc|decimal_com_virgula(0)}}</span>
+                    <span class="br-tag count bg-warning" title="% sobre o total de Planos de Entregas ATIVOS">{{ (100 * q.pes_ativ_venc / q.pes_ativ)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;Incluidos</b> <span>
+                  <span class="br-tag count bg-secondary" title="">{{q.pes_incl|decimal_com_virgula(0)}}</span>
+                  <span class="br-tag count bg-secondary" title="% sobre o total de Planos de Entregas">{{ (100 * q.pes_incl / q.pes_total)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  &emsp;<a href="{{url_for('entregas.lista_pe', tipo='incl_venc')}}">Vencidos</a> <span>
+                  <span class="br-tag count bg-warning" title="">{{q.pes_incl_venc|decimal_com_virgula(0)}}</span>
+                  <span class="br-tag count bg-warning" title="% sobre o total de Planos de Entregas INCLUIDOS">{{ (100 * q.pes_incl_venc / q.pes_incl)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;Homologando</b> <span>
+                  <span class="br-tag count bg-secondary" title="">{{q.pes_homo|decimal_com_virgula(0)}}</span>
+                  <span class="br-tag count bg-secondary" title="% sobre o total de Planos de Entregas">{{ (100 * q.pes_homo / q.pes_total)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  &emsp;<a href="{{url_for('entregas.lista_pe', tipo='homo_venc')}}">Vencidos</a> <span>
+                  <span class="br-tag count bg-warning">{{q.pes_homo_venc|decimal_com_virgula(0)}}</span>
+                  <span class="br-tag count bg-warning" title="% sobre o total de Planos de Entregas HOMOLOGANDO">{{ (100 * q.pes_homo_venc / q.pes_homo)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;Concluídos</b> <span>
+                  <span class="br-tag count bg-secondary" title="">{{q.pes_conc|decimal_com_virgula(0)}}</span>
+                  <span class="br-tag count bg-secondary" title="% sobre o total de Planos de Entregas">{{ (100 * q.pes_conc / q.pes_total)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;Avaliados</b> <span>
+                  <span class="br-tag count bg-secondary" title="">{{q.pes_aval|decimal_com_virgula(0)}}</span>
+                  <span class="br-tag count bg-secondary" title="% sobre o total de Planos de Entregas">{{ (100 * q.pes_aval / q.pes_total)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;Cancelados</b> <span>
+                    <span class="br-tag count bg-secondary" title="">{{q.pes_canc|decimal_com_virgula(0)}}</span>
+                    <span class="br-tag count bg-secondary" title="% sobre o total de Planos de Entregas">{{ (100 * q.pes_canc / q.pes_total)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;Suspensos</b> <span>
+                  <span class="br-tag count bg-secondary" title="">{{q.pes_susp|decimal_com_virgula(0)}}</span>
+                  <span class="br-tag count bg-secondary" title="% sobre o total de Planos de Entregas">{{ (100 * q.pes_susp / q.pes_total)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+              </ul>  
+            
+            </div> 
+
+            <div class="card-footer text-body-secondary">
+              <p><b><span style="font-size: 20px;">Índice de avaliação:</span></b> <span class="br-tag bg-violet-warm-vivid-70" title = "Uma relação entre avaliados e pendentes de avaliação. Próximo a zero é ruim, próximo a 1 é bom.">
+                      {% if (q.pes_ativ_venc + q.pes_conc + q.pes_aval) != 0 %}
+                        {{(q.pes_aval/(q.pes_ativ_venc + q.pes_conc + q.pes_aval))|decimal_com_virgula(1)}}
+                      {% else %}
+                        0
+                      {% endif %}</span>
+              </p>
+              <p><b><span style="font-size: 20px;">Média de dias até a avaliação:</span></b> <span class="br-tag bg-violet-warm-vivid-70" title = "A avaliação de um Plano de Entregas deveria acontecer em até 30 dias do seu término.">
+                {{mda |decimal_com_virgula(1)}}  &plusmn; {{des_pes|decimal_com_virgula(1)}}</span>
+              </p>
+
+            </div>
+
+            {% endfor %}
+          </div>   
+        
+
+      </div>
+
+      <div class="col">
+
+          <div class="card card border-secondary">
+            {% for q in qtd_pts %}
+            <div class="card-header">
+              <h4> <span class="br-tag bg-secondary" title="">{{q.pts_total|decimal_com_virgula(0)}} </span> Planos de Trabalho </h4>
+            </div>
+
+            <div class="card-body">
+              
+              <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;Ativos</b> <span>
+                    <span class="br-tag count bg-secondary" title="">{{q.pts_ativ|decimal_com_virgula(0)}} </span>
+                    <span class="br-tag count bg-secondary" title="% sobre o total de Planos de Entregas">{{ (100 * q.pts_ativ / q.pts_total)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  &emsp;<a href="{{url_for('trabalhos.lista_pts', tipo='ativ_venc')}}">Vencidos</a> <span>
+                    <span class="br-tag count bg-warning" title="">{{q.pts_ativ_venc|decimal_com_virgula(0)}}</span>
+                    <span class="br-tag count bg-warning" title="% sobre o total de Planos de Entregas ATIVOS">{{ (100 * q.pts_ativ_venc / q.pts_ativ)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;Incluidos</b> <span>
+                  <span class="br-tag count bg-secondary" title="">{{q.pts_incl|decimal_com_virgula(0)}}</span>
+                  <span class="br-tag count bg-secondary" title="% sobre o total de Planos de Entregas">{{ (100 * q.pts_incl / q.pts_total)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  &emsp;<a href="{{url_for('trabalhos.lista_pts', tipo='incl_venc')}}">Vencidos</a> <span>
+                  <span class="br-tag count bg-warning" title="">{{q.pts_incl_venc|decimal_com_virgula(0)}}</span>
+                  <span class="br-tag count bg-warning" title="% sobre o total de Planos de Entregas INCLUIDOS">{{ (100 * q.pts_incl_venc / q.pts_incl)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;Aguardando Assinatura</b> <span>
+                  <span class="br-tag count bg-secondary" title="">{{q.pts_agas|decimal_com_virgula(0)}}</span>
+                  <span class="br-tag count bg-secondary" title="% sobre o total de Planos de Entregas">{{ (100 * q.pts_agas / q.pts_total)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  &emsp;<a href="{{url_for('trabalhos.lista_pts', tipo='agas_venc')}}">Vencidos</a> <span>
+                  <span class="br-tag count bg-warning">{{q.pts_agas_venc|decimal_com_virgula(0)}}</span>
+                  <span class="br-tag count bg-warning" title="% sobre o total de Planos de Entregas HOMOLOGANDO">{{ (100 * q.pts_agas_venc / q.pts_agas)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;Concluídos</b> <span>
+                  <span class="br-tag count bg-secondary" title="">{{q.pts_conc|decimal_com_virgula(0)}}</span>
+                  <span class="br-tag count bg-secondary" title="% sobre o total de Planos de Entregas">{{ (100 * q.pts_conc / q.pts_total)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  &emsp;<a href="{{url_for('trabalhos.lista_pts', tipo='conc_sava')}}">Não Avaliados</a> <span>
+                  <span class="br-tag count bg-warning" title="">{{(q.pts_conc - qtd_pts_aval)|decimal_com_virgula(0)}}</span>
+                  <span class="br-tag count bg-warning" title="% sobre o total de Planos de Entregas">{{ (100 * (q.pts_conc - qtd_pts_aval) / q.pts_conc)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;Cancelados</b> <span>
+                    <span class="br-tag count bg-secondary" title="">{{q.pts_canc|decimal_com_virgula(0)}}</span>
+                    <span class="br-tag count bg-secondary" title="% sobre o total de Planos de Entregas">{{ (100 * q.pts_canc / q.pts_total)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <b>&emsp;Suspensos</b> <span>
+                  <span class="br-tag count bg-secondary" title="">{{q.pts_susp|decimal_com_virgula(0)}}</span>
+                  <span class="br-tag count bg-secondary" title="% sobre o total de Planos de Entregas">{{ (100 * q.pts_susp / q.pts_total)|decimal_com_virgula(1) }}% </span>
+                  </span>
+                </li>
+              </ul>  
+            
+            </div> 
+
+            <div class="card-footer text-body-secondary">
+              
+              <p><b><span style="font-size: 20px;">Índice de avaliação:</span></b> <span class="br-tag bg-violet-warm-vivid-70" title = "Uma relação entre avaliados e pendentes de avaliação. Próximo a zero é ruim, próximo a 1 é bom.">
+                {% if (q.pts_ativ_venc + q.pts_conc) != 0 %}
+                  {{(qtd_pts_aval/(q.pts_ativ_venc + q.pts_conc))|decimal_com_virgula(1)}}</span></p>
+                {% else %}
+                  0
+                {% endif %}</span>
+              </p>
+              <p><b><span style="font-size: 20px;">Média de dias entre registro e avaliação: </span></b><span class="br-tag bg-violet-warm-vivid-70" title = "A avaliação de um Plano de Trabalho deveria acontecer em até 20 dias após a data limite do registro feito pelo participante.">
+                {{ mda_pts|decimal_com_virgula(1)}} &plusmn; {{des_pts|decimal_com_virgula(1)}}</span>
+              </p>
+              
+            </div>
+
+            {% endfor %}
+          </div>  
+
+      </div>
+
+    </div>
+
+    <p></p>
+
+  </div>
+</div>
+
+{% endblock %}

@@ -42,7 +42,13 @@
           <th scope="row"><p align = "center">{{avaliacoes_pt.index(a) + 1}}</p></th>
           <td><p align = "center"> {{a.data_inicio.strftime('%d/%m/%Y')}} - {{a.data_fim.strftime('%d/%m/%Y')}}  </p></td>
           <td><p align = "center"> {{a.data_avaliacao.strftime('%d/%m/%Y')}} </p></td>
-          <td><p align = "center"> {{a.nota.split('"')[2][:-1]}} </p></td>
+          <td><p align = "center"> 
+            {% if a.nota[0] == '"' %}
+              {{a.nota.split('"')[2][:-1]}}
+            {% else %}
+              {{ a.nota }}
+            {% endif %} 
+          </p></td>
           <td><p align = "left"> {{a.avaliador}} </p></td>
           <td><p align = "left"> {{a.avaliado}} </p></td>
           <td><p align = "center"> 

@@ -19,7 +19,7 @@
       icon="fa-file-pen", 
       title="Planos de Entregas",
       description="Dados de Planos de Entregas",
-      link=url_for("entregas.lista_pe")
+      link=url_for("entregas.lista_pe", tipo = "geral")
     %}
       {% include "card_menu.html" %}
     {% endwith %}
@@ -28,7 +28,7 @@
       icon="fa-screwdriver-wrench", 
       title="Planos de Trabalho",
       description="Lista dos Planos de Trabalho",
-      link=url_for("trabalhos.lista_pts", lista = "Todos")
+      link=url_for("trabalhos.lista_pts", tipo = "geral")
     %}
       {% include "card_menu.html" %}
     {% endwith %}
@@ -56,6 +56,24 @@
       title="Erros em envios",
       description="Dados sobre envios mal sucedidos",
       link=url_for('envios.envios_insucesso')
+    %}
+      {% include "card_menu.html" %}
+    {% endwith %}
+
+    {% with 
+      icon="fa-info-circle", 
+      title= "Dados Agregados",
+      description="Alguns dados para monitoramento do PGD.",
+      link=url_for('core.dados')
+    %}
+      {% include "card_menu.html" %}
+    {% endwith %}
+    
+    {% with 
+      icon="fa-calendar-check", 
+      title= data_ref.strftime('%d/%m/%Y') + " ("+dias_data_ref+" dias atrás)",
+      description="Data a partir da qual os dados são recuperados de forma a evitar excesso de informação nas telas.",
+      link=url_for('core.data_referencia')
     %}
       {% include "card_menu.html" %}
     {% endwith %}

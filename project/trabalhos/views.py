@@ -17,6 +17,7 @@ from sqlalchemy import func, case, literal_column
 from sqlalchemy.sql import label
 from sqlalchemy.orm import aliased
 from project import db, app
+from project.core.views import data_ref
 from project.models import Unidades, Pessoas, planos_trabalhos, planos_trabalhos_consolidacoes, planos_trabalhos_entregas, atividades,\
                            avaliacoes, tipos_modalidades, planos_entregas_entregas
 
@@ -45,9 +46,9 @@ def get_random_string(length):
 
 
 # lista dos planos de trabalho da unidade
-@trabalhos.route('<lista>/lista_pts',methods=['GET','POST'])
+@trabalhos.route('<tipo>/lista_pts',methods=['GET','POST'])
 @login_required
-def lista_pts(lista):
+def lista_pts(tipo):
 
     """
         +----------------------------------------------------------------------+
@@ -59,6 +60,8 @@ def lista_pts(lista):
     
     
     hoje = dt.today()
+
+    dias = os.environ.get('DIAS_DATA_REF')
 
 
     #subquery que conta trabalhos em cada plano de trabalho 
@@ -72,38 +75,107 @@ def lista_pts(lista):
     avaliacoes_pt = db.session.query(planos_trabalhos_consolidacoes.plano_trabalho_id,
                                      label('qtd_aval',func.count(avaliacoes.id)))\
                               .join(avaliacoes, avaliacoes.plano_trabalho_consolidacao_id == planos_trabalhos_consolidacoes.id)\
-                              .filter(avaliacoes.data_avaliacao <= hoje)\
+                              .filter(avaliacoes.data_avaliacao <= hoje,
+                                      planos_trabalhos_consolidacoes.deleted_at == None)\
                               .group_by(planos_trabalhos_consolidacoes.plano_trabalho_id)\
-                              .subquery()                                                                                                                           
+                              .subquery()                                                                                                                            
     
-    if lista == 'Todos':
-        lista = '%'
+    if tipo == 'geral':
     
-    planos_trabalho_lista = db.session.query(planos_trabalhos.id,
-                                            planos_trabalhos.data_inicio,
-                                            planos_trabalhos.data_fim,
-                                            planos_trabalhos.carga_horaria,
-                                            planos_trabalhos.forma_contagem_carga_horaria,
-                                            planos_trabalhos.status,
-                                            label('forma',tipos_modalidades.nome),
-                                            planos_trabalhos.data_envio_api_pgd,
-                                            Pessoas.nome,
-                                            Unidades.sigla,
-                                            label('situacao',planos_trabalhos.status),
-                                            label('vencido',case((planos_trabalhos.data_fim < hoje, literal_column("'s'")), else_=literal_column("'n'"))),
-                                            trabalhos.c.qtd_trabalhos,
-                                            avaliacoes_pt.c.qtd_aval)\
-                                    .filter(planos_trabalhos.deleted_at == None,
-                                            planos_trabalhos.status.like(lista))\
-                                    .join(Pessoas, Pessoas.id == planos_trabalhos.usuario_id)\
-                                    .join(Unidades, Unidades.id == planos_trabalhos.unidade_id)\
-                                    .join(tipos_modalidades, tipos_modalidades.id == planos_trabalhos.tipo_modalidade_id)\
-                                    .order_by(planos_trabalhos.status,Unidades.sigla,Pessoas.nome,planos_trabalhos.data_inicio)\
-                                    .outerjoin(trabalhos, trabalhos.c.plano_trabalho_id == planos_trabalhos.id)\
-                                    .outerjoin(avaliacoes_pt, avaliacoes_pt.c.plano_trabalho_id == planos_trabalhos.id)\
-                                    .all()
+        planos_trabalho_lista = db.session.query(planos_trabalhos.id,
+                                                planos_trabalhos.data_inicio,
+                                                planos_trabalhos.data_fim,
+                                                planos_trabalhos.carga_horaria,
+                                                planos_trabalhos.forma_contagem_carga_horaria,
+                                                planos_trabalhos.status,
+                                                label('forma',tipos_modalidades.nome),
+                                                planos_trabalhos.data_envio_api_pgd,
+                                                Pessoas.nome,
+                                                Unidades.sigla,
+                                                label('situacao',planos_trabalhos.status),
+                                                label('vencido',case((planos_trabalhos.data_fim < hoje, literal_column("'s'")), else_=literal_column("'n'"))),
+                                                trabalhos.c.qtd_trabalhos,
+                                                avaliacoes_pt.c.qtd_aval)\
+                                        .filter(planos_trabalhos.deleted_at == None,
+                                                planos_trabalhos.data_inicio >= data_ref(dias))\
+                                        .join(Pessoas, Pessoas.id == planos_trabalhos.usuario_id)\
+                                        .join(Unidades, Unidades.id == planos_trabalhos.unidade_id)\
+                                        .join(tipos_modalidades, tipos_modalidades.id == planos_trabalhos.tipo_modalidade_id)\
+                                        .order_by(planos_trabalhos.status,Unidades.sigla,Pessoas.nome,planos_trabalhos.data_inicio)\
+                                        .outerjoin(trabalhos, trabalhos.c.plano_trabalho_id == planos_trabalhos.id)\
+                                        .outerjoin(avaliacoes_pt, avaliacoes_pt.c.plano_trabalho_id == planos_trabalhos.id)\
+                                        .all()
 
-    quantidade = len(planos_trabalho_lista)                         
+        quantidade = len(planos_trabalho_lista) 
+
+    elif tipo == 'conc_sava':
+
+        planos_trabalho_lista = db.session.query(planos_trabalhos.id,
+                                                 planos_trabalhos.data_inicio,
+                                                 planos_trabalhos.data_fim,
+                                                 planos_trabalhos.carga_horaria,
+                                                 planos_trabalhos.forma_contagem_carga_horaria,
+                                                 planos_trabalhos.status,
+                                                 label('forma',tipos_modalidades.nome),
+                                                 planos_trabalhos.data_envio_api_pgd,
+                                                 Pessoas.nome,
+                                                 Unidades.sigla,
+                                                 label('situacao',planos_trabalhos.status),
+                                                 label('vencido',case((planos_trabalhos.data_fim < hoje, literal_column("'s'")), else_=literal_column("'n'"))),
+                                                 trabalhos.c.qtd_trabalhos,
+                                                 avaliacoes_pt.c.qtd_aval)\
+                                  .filter(planos_trabalhos.deleted_at == None,
+                                          planos_trabalhos.status == 'CONCLUIDO',
+                                          avaliacoes_pt.c.qtd_aval == 0)\
+                                  .join(Pessoas, Pessoas.id == planos_trabalhos.usuario_id)\
+                                  .join(Unidades, Unidades.id == planos_trabalhos.unidade_id)\
+                                  .join(tipos_modalidades, tipos_modalidades.id == planos_trabalhos.tipo_modalidade_id)\
+                                  .order_by(planos_trabalhos.status,Unidades.sigla,Pessoas.nome,planos_trabalhos.data_inicio)\
+                                  .outerjoin(trabalhos, trabalhos.c.plano_trabalho_id == planos_trabalhos.id)\
+                                  .outerjoin(avaliacoes_pt, avaliacoes_pt.c.plano_trabalho_id == planos_trabalhos.id)\
+                                  .all()
+
+        quantidade = len(planos_trabalho_lista)
+    
+    else:
+
+        if tipo == 'ativ_venc':
+            status_pesq = 'ATIVO'
+        elif tipo == 'incl_venc':
+            status_pesq = 'INCLUIDO'
+        elif tipo == 'agas_venc':
+            status_pesq = 'AGUARDANDO_ASSINATURA'
+    
+        planos_trabalho_lista = db.session.query(planos_trabalhos.id,
+                                                 planos_trabalhos.data_inicio,
+                                                 planos_trabalhos.data_fim,
+                                                 planos_trabalhos.carga_horaria,
+                                                 planos_trabalhos.forma_contagem_carga_horaria,
+                                                 planos_trabalhos.status,
+                                                 label('forma',tipos_modalidades.nome),
+                                                 planos_trabalhos.data_envio_api_pgd,
+                                                 Pessoas.nome,
+                                                 Unidades.sigla,
+                                                 label('situacao',planos_trabalhos.status),
+                                                 label('vencido',case((planos_trabalhos.data_fim < hoje, literal_column("'s'")), else_=literal_column("'n'"))),
+                                                 trabalhos.c.qtd_trabalhos,
+                                                 avaliacoes_pt.c.qtd_aval)\
+                                  .filter(planos_trabalhos.deleted_at == None,
+                                          planos_trabalhos.status == status_pesq,
+                                          planos_trabalhos.data_fim < hoje)\
+                                  .join(Pessoas, Pessoas.id == planos_trabalhos.usuario_id)\
+                                  .join(Unidades, Unidades.id == planos_trabalhos.unidade_id)\
+                                  .join(tipos_modalidades, tipos_modalidades.id == planos_trabalhos.tipo_modalidade_id)\
+                                  .order_by(planos_trabalhos.status,Unidades.sigla,Pessoas.nome,planos_trabalhos.data_inicio)\
+                                  .outerjoin(trabalhos, trabalhos.c.plano_trabalho_id == planos_trabalhos.id)\
+                                  .outerjoin(avaliacoes_pt, avaliacoes_pt.c.plano_trabalho_id == planos_trabalhos.id)\
+                                  .all()
+
+        quantidade = len(planos_trabalho_lista) 
+
+
+    qtd_pts_total =  db.session.query(planos_trabalhos.id).filter(planos_trabalhos.deleted_at == None).count()
+    
  
     form = CSV_Form()
 
@@ -127,8 +199,10 @@ def lista_pts(lista):
     
     return render_template ('lista_pts.html', planos_trabalho_lista = planos_trabalho_lista, 
                                               quantidade = quantidade,
-                                              lista = lista,
-                                              form = form)
+                                              qtd_pts_total = qtd_pts_total,
+                                              tipo = tipo,
+                                              form = form,
+                                              data_ref = data_ref(dias))
 
 
 

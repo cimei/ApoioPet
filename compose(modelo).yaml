@@ -23,5 +23,6 @@ services:
       STR_ATRIBUTO: "mail"
       USER_LIST: "<lista de usuários (apelidos) para acesso direto>"
       USER_LIST_PASS: "<senha para acesso direto>"
+      DIAS_DATA_REF: <quantidade de dias, anteriores à data atual, para definir a data de referência>
 
 

@@ -461,6 +461,8 @@ class Pessoas(db.Model, UserMixin):
     data_inicial_pedagio     = db.Column(db.DateTime)
     data_final_pedagio       = db.Column(db.DateTime)
     tipo_pedagio             = db.Column(db.Integer)
+    modalidade_pgd           = db.Column(db.String)
+    participa_pgd            = db.Column(db.String)
 
     # nome_jornada             = db.Column(db.String)
     # cod_jornada              = db.Column(db.Integer)
@@ -500,7 +502,9 @@ class Pessoas(db.Model, UserMixin):
                      , data_envio_api_pgd
                      , data_inicial_pedagio
                      , data_final_pedagio
-                     , tipo_pedagio):
+                     , tipo_pedagio
+                     , modalidade_pgd
+                     , participa_pgd):
 
         self.id                       = id
         self.created_at               = created_at
@@ -537,6 +541,8 @@ class Pessoas(db.Model, UserMixin):
         self.data_inicial_pedagio     = data_inicial_pedagio
         self.data_final_pedagio       = data_final_pedagio
         self.tipo_pedagio             = tipo_pedagio
+        self.modalidade_pgd           = modalidade_pgd
+        self.participa_pgd            = participa_pgd
 
     @staticmethod
     def conecta_ldap(username, password, str_DN):
@@ -599,6 +605,37 @@ class tipos_modalidades(db.Model):
     def __repr__ (self):
             return f"{self.nome}"    
       
+# tipos_modalidades_siape
+
+class tipos_modalidades_siape(db.Model):
+
+    __tablename__ = 'tipos_modalidades_siape'
+    # __table_args__ = {"schema": ""}
+
+    id                  = db.Column(db.String, primary_key = True)
+    created_at          = db.Column(db.DateTime)
+    updated_at          = db.Column(db.DateTime)
+    deleted_at          = db.Column(db.DateTime)
+    nome                = db.Column(db.String)
+    tipos_modalidade_id = db.Column(db.String)
+    
+    def __init__(self, id    
+                     , created_at
+                     , updated_at
+                     , deleted_at
+                     , nome
+                     , tipos_modalidade_id):
+        
+        self.id                  = id
+        self.created_at          = created_at
+        self.updated_at          = updated_at
+        self.deleted_at          = deleted_at
+        self.nome                = nome
+        self.tipos_modalidade_id = tipos_modalidade_id
+        
+    def __repr__ (self):
+            return f"{self.nome}"    
+            
 
 # programas (regramento)
 
@@ -714,6 +751,42 @@ class programas(db.Model):
     def __repr__ (self):
         return f"{self.nome};{self.data_inicio};{self.data_fim}"
     
+# programas_participantes (relação de regramentos com pessoas)
+
+class programas_participantes(db.Model):
+
+    __tablename__ = 'programas_participantes'
+    # __table_args__ = {"schema": ""}
+
+    id           = db.Column(db.String, primary_key = True)
+    created_at   = db.Column(db.DateTime)
+    updated_at   = db.Column(db.DateTime)
+    deleted_at   = db.Column(db.DateTime)
+    habilitado   = db.Column(db.Integer)
+    programa_id  = db.Column(db.String)
+    usuario_id   = db.Column(db.String)
+    documento_id = db.Column(db.String)
+
+    def __init__(self, id
+                     , created_at
+                     , updated_at
+                     , deleted_at
+                     , habilitado
+                     , programa_id
+                     , usuario_id
+                     , documento_id):
+         
+        self.id           = id
+        self.created_at   = created_at
+        self.updated_at   = updated_at
+        self.deleted_at   = deleted_at
+        self.habilitado   = habilitado
+        self.programa_id  = programa_id
+        self.usuario_id   = usuario_id
+        self.documento_id = documento_id 
+
+    def __repr__ (self):
+        return f"{self.habilitado}"
 
 # Planos de Entregas
 

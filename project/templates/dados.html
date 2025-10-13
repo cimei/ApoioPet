@@ -1,0 +1,40 @@
+{% extends "template_gov.html" %}
+{% block content %}
+
+
+  <div class="col mb-5">
+    <div class="br-breadcrumb">
+      <ul class="crumb-list">
+        <li class="crumb home"><a class="br-button circle" href="{{url_for('core.inicio')}}"><span class="sr-only">Página inicial</span><i class="fa fa-home"></i></a></li>
+        <li class="crumb" data-active="active"><i class="icon fa fa-chevron-right"></i><span>Dados Agregados</span></li>
+      </ul>
+    </div>
+  </div>
+
+
+    <div class="row mt-5">
+      <div class="d-flex justify-content-center  flex-wrap">
+    
+
+        {% with 
+          icon="fa-percent", 
+          title="Números",
+          description="Dados numéricos e algumas porcentagens.",
+          link=url_for('core.numeros')
+        %}
+          {% include "card_menu.html" %}
+        {% endwith %}
+
+        {% with 
+          icon="fa-bar-chart", 
+          title="Gráficos",
+          description="Dados apresentados em gráficos.",
+          link=url_for('core.graficos')
+        %}
+          {% include "card_menu.html" %}
+        {% endwith %}
+
+      </div>
+    </div>
+
+{% endblock %}

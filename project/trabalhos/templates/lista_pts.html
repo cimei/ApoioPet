@@ -22,10 +22,20 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-9">
+    
+    <div class="col-6">
       <h4>Lista de Planos de Trabalho</h4>
     </div>
-    <div class="col-2">
+    
+    <div class="col-5">
+
+      {% if tipo == 'geral' %}
+        <h4>Data de referência: <b>{{data_ref.strftime('%d/%m/%Y')}}</b></h4>
+      {% endif %}
+
+    </div>
+    
+    <div class="col-1">
       <form class="needs-validation" method='POST' >
 
         {{ form.hidden_tag() }}
@@ -42,7 +52,9 @@
 
 <caption>
   <div class="row">
-      <div class="col-10">
+      
+      <div class="col-7">
+
         <p>Lista de <b>{{quantidade}}</b> Planos de Trabalho
           {% if lista == 'AGUARDANDO_ASSINATURA' %}
             aguardando assinatura
@@ -56,9 +68,11 @@
             em todas as situações  
           {% else %}
             {{lista}}  
-          {% endif %}    
+          {% endif %}  
+          de um total de <b>{{qtd_pts_total}}</b>  
         </p>
       </div>
+
   </div>
 </caption>
 
@@ -92,6 +106,7 @@
     <tbody>
       {% for p in planos_trabalho_lista %}
       <tr>
+
         <th scope="row"><p align = "center"> 
           {#
           <a class="card-title" href="{{url_for('trabalhos.ver_pt',ptId=p.planoTrabalhoId)}}">
@@ -104,22 +119,42 @@
         <td><p align = "center"> {{p.nome}} </p></td>
         <td><p align = "center"> {{p.sigla}} </p></td>
         <td><p align = "center"> {{p.data_inicio.strftime('%d/%m/%Y')}} </p></td>
-        <td><p align = "center"> {{p.data_fim.strftime('%d/%m/%Y')}} </p></td> 
+        <td><p align = "center"> 
+          {% if p.vencido == 's' and (p.status == 'ATIVO' or p.status == 'AGUARDANDO_ASSINATURA' or p.status == 'INCLUIDO') %}
+              <b>{{p.data_fim.strftime('%d/%m/%Y')}}</b>
+          {% else %}  
+              {{p.data_fim.strftime('%d/%m/%Y')}}
+          {% endif %}
+        </p></td> 
         <td><p align = "center"> {{p.forma}} </p></td>
         <td><p align = "center">  
-            {% if p.vencido == 's' and p.status == 'ATIVO' %} 
-              <span class="text-danger"><b>{{p.status}}</b></span>
-            {% elif p.status == 'INCLUIDO' %}
-              <span class="text-primary">{{p.status}}</span>
-            {% elif p.status == 'AVALIADO' %}
-              <span class="text-success">{{p.status}}</span>  
-            {% elif p.status == 'AGUARDANDO_ASSINATURA' %}
-              <span class="text-warning">{{p.status}}</span>  
-            {% else %}
-              <span class="text-dark">{{p.status}}</span>
-            {% endif %}
+          {% if p.status == 'INCLUIDO' %}
+                {% if p.vencido == 's' %}
+                  <span class="text-primary"><b>{{p.status}}</b></span>
+                {% else %}
+                  <span class="text-primary">{{p.status}}</span>
+                {% endif %}  
+              {% elif p.status == 'ATIVO' %}
+                {% if p.vencido == 's' %}
+                  <span class="text-danger"><b>{{p.status}}</b></span>
+                {% else %}
+                  <span class="text-success">{{p.status}}</span>
+                {% endif %}
+              {% elif p.status == 'AGUARDANDO_ASSINATURA' %}
+                {% if p.vencido == 's' %}
+                  <span class="text-warning"><b>{{p.status}}</b></span>
+                {% else %}
+                  <span class="text-warning">{{p.status}}</span>
+                {% endif %}
+              {% elif p.status == 'CANCELADO' %}
+                <span class="text-secondary">{{p.status}}</span>
+              {% elif p.status == 'AVALIADO' %}
+                <span class="text-info">{{p.status}}</span>  
+              {% else %}
+                <span class="text-dark">{{p.status}}</span>
+              {% endif %}
         </p></td>
-        <td><p align = "center"> {{p.carga_horaria|decimal_com_virgula}} ({{p.forma_contagem_carga_horaria}}) </p></td>  
+        <td><p align = "center"> {{p.carga_horaria|decimal_com_virgula(1)}} ({{p.forma_contagem_carga_horaria}}) </p></td>  
         <td><p align = "center"> 
           {% if p.qtd_trabalhos != None %}
             <a style="text-decoration: none" href="{{url_for('trabalhos.consulta_trabalhos',ptId=p.id)}}" class="btn btn-outline-success btn-sm" role="button" aria-pressed="true">
@@ -136,7 +171,9 @@
           Não há
         {% endif%}
       </p></td>
-      </tr>
+
+    </tr>
+
       {% endfor %}
     </tbody>
 

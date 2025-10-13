@@ -2,6 +2,9 @@
 
 A imagem docker está disponível em https://hub.docker.com/r/cimei/apoiopet
 
+Caso encontre alguma discrepância entre os dados deste sitema e o encontrado no 
+PGD Petrvs de sua instituição, me avise que eu irei buscar a correção.
+
 **Mapa Estratégico**
 
 - Nome, missão, visão, resultados, objetivos por eixo temático e valores
@@ -24,39 +27,40 @@ A imagem docker está disponível em https://hub.docker.com/r/cimei/apoiopet
   * vigência,
   * tipo de meta,
   * demandante e
-  * destinatário;
+  * destinatário
 
 **Plano de trabalho**   
 
  - Listagem de todos os PTs cadastrados contendo:
-    * Quantidade total de PTs cadastrados (geral);
-    * unidade;
-    * nome do participante;
-    * situação;
-    * inicio e fim;
-    * modalidade do plano de trabalho (forma);
-    * quantidade do %CHD total;
-    * se foi avaliado e qual a avaliação;
-    * detalhamento dos trabalhos;
+    * Quantidade total de PTs cadastrados (geral)
+    * unidade
+    * nome do participante
+    * situação
+    * inicio e fim
+    * modalidade do plano de trabalho (forma)
+    * quantidade do %CHD total
+    * se foi avaliado e qual a avaliação
+    * detalhamento dos trabalhos
 
 **Pessoas**
 
-* Nome;  
-* Data nascimento;
-* Matrícula;
-* E-mail;      
-* Perfil (Participante, Unidade, etc.);
-* Situação;
-* Unidade de lotação;
-* Quantos e quais planos de trabalho foram cadastrados;
+* Nome  
+* Data nascimento
+* Matrícula
+* E-mail
+* Perfil (Participante, Unidade, etc.)
+* Situação
+* Unidade de lotação
+* Quantos e quais planos de trabalho a pessoa está vinculada
+* Quantos e quais regramentos aos quais a pessoa está vinculada
 
 **Unidades**
 
- * Sigla;
- * Nome;
- * Código;
- * UF;
- * Unidade Pai;
+ * Sigla
+ * Nome
+ * Código
+ * UF
+ * Unidade Pai
  * Titular
  * Substituto
  * Delegado
@@ -67,9 +71,19 @@ A imagem docker está disponível em https://hub.docker.com/r/cimei/apoiopet
  * Planos de trabalho
  * Participantes
 
-## Documentação Técnica
+**Dados Agregados**
 
-* **[Consultas SQL do Sistema](CONSULTAS_SQL.md)** - Documentação completa de todas as consultas SQL realizadas pelo sistema, organizadas por módulo e funcionalidade.
-
+ * Números
+ * Gráficos
  
+**Algumas telas do sistema**
+ 
+ * Tela inicial
+ ![alt text](image-1.png)
 
+ * Números
+![alt text](image.png)
+
+ * Gráficos
+![alt text](image-2.png)
+...

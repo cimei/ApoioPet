@@ -1,0 +1,73 @@
+{% extends "template_gov.html" %}
+{% block content %}
+
+<div class="col mb-5">
+  <div class="br-breadcrumb">
+    <ul class="crumb-list">
+      <li class="crumb home"><a class="br-button circle" href="{{url_for('core.inicio')}}"><span class="sr-only">Página inicial</span><i class="fa fa-home"></i></a></li>
+      <li class="crumb"><i class="icon fa fa-chevron-right"></i><a href="{{url_for('pessoas.lista_pessoas')}}">Pessoas</a></li>
+      <li class="crumb" data-active="active"><i class="icon fa fa-chevron-right"></i><span>Regramentos vinculados a uma pessoa</span></li>
+    </ul>
+  </div>
+</div>
+
+<div class="container">
+  
+  <h4>Lista de Regramentos vinculados a <b>{{dados_pessoa.nome}}</b></h4>
+
+<caption>
+  <div class="row">
+      <div class="col-8">
+        <p>Lista de <b>{{quantidade}}</b> Regramentos</p>
+      </div>
+  </div>
+</caption>
+
+<div style="overflow-y:auto">
+  <table id="table"
+              data-toggle="table"
+              data-filter-control="true"
+              data-show-search-clear-button="true"
+              data-sortable="true"
+              classes="table-sm"
+              data-show-columns="true"
+              data-show-columns-toggle-all="true"
+              class="table table-striped table-hover table-sm">
+          <caption>Regramentos</caption>
+
+    <thead>
+      <tr>
+        <th scope="col"><p align = "center">#</p></th>
+        <th scope="col" data-field="Unidade" data-filter-control="input" data-sortable="true" data-filter-control-placeholder="Termo de pesquisa..."><p align = "center">Nome</p></th>
+        <th scope="col" data-sortable="true"><p align = "center">Início</p></th>
+        <th scope="col" data-sortable="true"><p align = "center">Fim</p></th>
+        <th scope="col" data-field="Forma" data-filter-control="input" data-sortable="true" data-filter-control-placeholder="Termo de pesquisa..."><p align = "center">Habilitado</p></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for r in regram_pessoa %}
+      <tr>
+        <th scope="row"><p align = "center"> 
+          {{regram_pessoa.index(r) + 1}} </p>
+        </th>
+        <td><p align = "center"> {{r.nome}} </p></td>
+        <td><p align = "center"> {{r.data_inicio.strftime('%d/%m/%Y')}} </p></td>
+        <td><p align = "center"> {{r.data_fim.strftime('%d/%m/%Y')}} </p></td> 
+        <td><p align = "center"> 
+          {% if r.habilitado == 1 %}
+            Sim
+          {% else %}
+            Não
+          {% endif %}
+           </p></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+
+  </table>
+
+</div>
+
+</div>
+{% endblock %}

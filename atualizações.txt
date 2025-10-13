@@ -1,4 +1,54 @@
-## Atualizações ##
+//# Atualizações ##
+
+25/09/2025
+Correção no csv de unidades.
+v1.0.14
+
+24/09/2025
+Correção na consulta a Entregas e PTs em registros da lista de Planos de Entregas.
+v1.0.13
+
+22/09/2025
+Grifo, na lista de unidades, nas unidades que possuem data de inativação associada.
+v1.0.12
+
+12/09/2025
+Inclsão de informções do SIAPE sobre PGD na lista de pessoas.
+v1.0.11
+
+11/09/2025
+
+Ajuste na lista de unidades.
+Acréscimo de dados de Unidades e Pessoas em Números e Gráficos.
+v1.0.10
+
+09/09/2025
+
+Correção na geração de csv para planos de entregas.
+Correção na apresentação dos gráficos.
+Inclusão de dados de regramentos na consulta a pessoas.
+Ajuste na informação de atribuições na lista de pessoas.
+v1.0.9
+
+05/09/2025
+
+Inclusão de gráficos. Números e Gráficos ficam então sob o menu de Dados Agregados.
+v1.0.8
+
+Inclusão de tela com alguns números sobre o PGD para monitoramento.
+v1.0.7
+
+29/08/2025
+
+Requerida a informação da quantidade de dias para se definir uma data de referência para o
+resgate dos dados. É definida como uma varíavel de ambiente no compose, mas pode ser alterada
+na tela inicial do sistema.
+v1.0.6
+
+28/08/2025
+
+Correção na string de conexão com o banco de dados: Faltava explicitar a porta.
+v1.0.5
 
 20/08/2025
 

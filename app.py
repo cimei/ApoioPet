@@ -1,5 +1,5 @@
 from project import app
-from datetime import datetime
+from datetime import datetime as dt
 import os
 import locale
 import ast
@@ -21,14 +21,17 @@ def str_to_date(valor):
     if valor == None or valor == '':
         return 0
     else:
-        return datetime.strptime(valor,'%Y-%m-%dT%H:%M:%S')   
+        return dt.strptime(valor,'%Y-%m-%dT%H:%M:%S')   
     
 @app.template_filter('decimal_com_virgula')
-def decimal_com_virgula(valor):
+def decimal_com_virgula(valor,casas_decimais):
     if valor == None or valor == '':
         return 0
     else:
-        return locale.format_string('%.1f',round(valor,1),grouping=True) 
+        if casas_decimais != 0:
+            return locale.format_string('%.1f',round(valor,casas_decimais),grouping=True)
+        else:
+            return locale.format_string('%d',round(valor),grouping=True)
 
 @app.template_filter('splitpart')
 def splitpart (value, char = '/'):
