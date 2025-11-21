@@ -23,6 +23,8 @@ from project import db
 from project.models import Unidades, Pessoas, unidades_integrantes, unidades_integrantes_atribuicoes, cidades
 from project.unidades.forms import PesquisaUnidForm, CSV_Form
 
+# from sqlalchemy.dialects import mysql
+
 unidades = Blueprint('unidades',__name__, template_folder='templates')
 
 
@@ -171,6 +173,9 @@ def lista_unidades():
                         .group_by(Unidades.id)\
                         .all()
 
+        # compiled_query = unids_csv.statement.compile(dialect=mysql.dialect()) 
+        # print(str(compiled_query))
+        # print("Parameters:", compiled_query.params)
 
         csv_caminho_arquivo = os.path.normpath('/app/project/static/unidades.csv')
         

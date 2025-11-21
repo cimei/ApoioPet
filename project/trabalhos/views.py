@@ -17,7 +17,7 @@ from sqlalchemy import func, case, literal_column
 from sqlalchemy.sql import label
 from sqlalchemy.orm import aliased
 from project import db, app
-from project.core.views import data_ref
+# from project.core.views import data_ref
 from project.models import Unidades, Pessoas, planos_trabalhos, planos_trabalhos_consolidacoes, planos_trabalhos_entregas, atividades,\
                            avaliacoes, tipos_modalidades, planos_entregas_entregas
 
@@ -61,7 +61,8 @@ def lista_pts(tipo):
     
     hoje = dt.today()
 
-    dias = os.environ.get('DIAS_DATA_REF')
+    # dias = os.environ.get('DIAS_DATA_REF') 
+    data_referencia = dt.strptime(os.environ.get('DATA_REFERENCIA'),'%Y-%m-%d')
 
 
     #subquery que conta trabalhos em cada plano de trabalho 
@@ -97,7 +98,7 @@ def lista_pts(tipo):
                                                 trabalhos.c.qtd_trabalhos,
                                                 avaliacoes_pt.c.qtd_aval)\
                                         .filter(planos_trabalhos.deleted_at == None,
-                                                planos_trabalhos.data_inicio >= data_ref(dias))\
+                                                planos_trabalhos.data_inicio >= data_referencia)\
                                         .join(Pessoas, Pessoas.id == planos_trabalhos.usuario_id)\
                                         .join(Unidades, Unidades.id == planos_trabalhos.unidade_id)\
                                         .join(tipos_modalidades, tipos_modalidades.id == planos_trabalhos.tipo_modalidade_id)\
@@ -202,7 +203,7 @@ def lista_pts(tipo):
                                               qtd_pts_total = qtd_pts_total,
                                               tipo = tipo,
                                               form = form,
-                                              data_ref = data_ref(dias))
+                                              data_ref = data_referencia)
 
 
 

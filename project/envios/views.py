@@ -13,7 +13,7 @@ from sqlalchemy import cast, Date
 from sqlalchemy.sql import label
 from sqlalchemy.orm import aliased
 from project import db, app
-from project.core.views import data_ref
+# from project.core.views import data_ref
 from project.models import Pessoas, planos_entregas,\
                            planos_trabalhos, envio_itens
 from project.envios.forms import CSV_Form
@@ -52,7 +52,8 @@ def envios_insucesso_pe():
 
     tipo = 'pe'
 
-    dias = os.environ.get('DIAS_DATA_REF')
+    # dias = os.environ.get('DIAS_DATA_REF') 
+    data_referencia = dt.strptime(os.environ.get('DATA_REFERENCIA'),'%Y-%m-%d')
 
     envios_sem_sucesso = db.session.query(envio_itens.id,
                                           envio_itens.tipo,
@@ -65,7 +66,7 @@ def envios_insucesso_pe():
                             .outerjoin(planos_entregas, planos_entregas.id == envio_itens.uid)\
                             .filter(envio_itens.sucesso == 0,
                                     envio_itens.tipo == 'entrega',
-                                    envio_itens.created_at >= data_ref(dias))\
+                                    envio_itens.created_at >= data_referencia)\
                             .order_by(envio_itens.created_at.cast(Date).desc(),
                                       planos_entregas.nome)\
                             .all() 
@@ -105,7 +106,7 @@ def envios_insucesso_pe():
                                             qtd_envios_sem_sucesso_total = qtd_envios_sem_sucesso_total,
                                             tipo = tipo,
                                             form = form,
-                                            data_ref = data_ref(dias))
+                                            data_ref = data_referencia)
 
 @envios.route('/envios_insucesso_pt',methods=['GET','POST'])
 @login_required
@@ -119,7 +120,8 @@ def envios_insucesso_pt():
 
     tipo = 'pt'       
 
-    dias = os.environ.get('DIAS_DATA_REF')         
+    # dias = os.environ.get('DIAS_DATA_REF') 
+    data_referencia = dt.strptime(os.environ.get('DATA_REFERENCIA'),'%Y-%m-%d')         
                                                                                                            
     donos_pts = aliased(Pessoas)                                                                          
         
@@ -136,7 +138,7 @@ def envios_insucesso_pt():
                             .outerjoin(donos_pts, donos_pts.id == planos_trabalhos.usuario_id)\
                             .filter(envio_itens.sucesso == 0,
                                     envio_itens.tipo == 'trabalho',
-                                    envio_itens.created_at >= data_ref(dias))\
+                                    envio_itens.created_at >= data_referencia)\
                             .order_by(envio_itens.created_at.cast(Date).desc(),
                                       donos_pts.nome)\
                             .all() 
@@ -176,7 +178,7 @@ def envios_insucesso_pt():
                                             qtd_envios_sem_sucesso_total = qtd_envios_sem_sucesso_total,
                                             tipo = tipo,
                                             form = form,
-                                            data_ref = data_ref(dias))
+                                            data_ref = data_referencia)
 
 
 @envios.route('/envios_insucesso_par',methods=['GET','POST'])
@@ -191,7 +193,8 @@ def envios_insucesso_par():
 
     tipo = 'par'  
 
-    dias = os.environ.get('DIAS_DATA_REF')                
+    # dias = os.environ.get('DIAS_DATA_REF') 
+    data_referencia = dt.strptime(os.environ.get('DATA_REFERENCIA'),'%Y-%m-%d')               
                                                                                                                    
     envios_sem_sucesso = db.session.query(envio_itens.id,
                                           envio_itens.tipo,
@@ -204,7 +207,7 @@ def envios_insucesso_par():
                             .outerjoin(Pessoas, Pessoas.id == envio_itens.uid)\
                             .filter(envio_itens.sucesso == 0,
                                     envio_itens.tipo == 'participante',
-                                    envio_itens.created_at >= data_ref(dias))\
+                                    envio_itens.created_at >= data_referencia)\
                             .order_by(envio_itens.created_at.cast(Date).desc(),
                                       Pessoas.nome)\
                             .all() 
@@ -242,6 +245,6 @@ def envios_insucesso_par():
                                             qtd_envios_sem_sucesso_total = qtd_envios_sem_sucesso_total,
                                             tipo = tipo,
                                             form = form,
-                                            data_ref = data_ref(dias))
+                                            data_ref = data_referencia)
 
 

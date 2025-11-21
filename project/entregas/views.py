@@ -13,7 +13,7 @@ from sqlalchemy import func, case, literal_column, or_, distinct, text
 from sqlalchemy.sql import label
 from sqlalchemy.orm import aliased
 from project import db, app
-from project.core.views import data_ref
+# from project.core.views import data_ref
 from project.models import Unidades, Pessoas, programas, planos_entregas, unidades_integrantes,\
                            avaliacoes, planos_entregas_entregas, planos_trabalhos_entregas, tipos_modalidades, planos_trabalhos_consolidacoes,\
                            planos_trabalhos
@@ -39,7 +39,8 @@ def lista_pe(tipo):
     +---------------------------------------------------------------------------------------+
     """
         
-    dias = os.environ.get('DIAS_DATA_REF')    
+    # dias = os.environ.get('DIAS_DATA_REF') 
+    data_referencia = dt.strptime(os.environ.get('DATA_REFERENCIA'),'%Y-%m-%d')   
 
     unid_dados = db.session.query(Unidades.id, Unidades.sigla, Unidades.path)\
                             .all()
@@ -92,7 +93,7 @@ def lista_pe(tipo):
                                     .outerjoin(planos_trab,planos_trab.c.pe_id == planos_entregas.id)\
                                     .outerjoin(avaliacoes_pes,avaliacoes_pes.c.plano_entrega_id == planos_entregas.id)\
                                     .filter(planos_entregas.deleted_at == None,
-                                            planos_entregas.data_inicio >= data_ref(dias))\
+                                            planos_entregas.data_inicio >= data_referencia)\
                                     .order_by(planos_entregas.status, Unidades.sigla, planos_entregas.data_inicio)\
                                     .all() 
                                 
@@ -172,7 +173,7 @@ def lista_pe(tipo):
                                             qtd_pes_total = qtd_pes_total,
                                             avaliacoes_dados = avaliacoes_dados,
                                             form = form,
-                                            data_ref = data_ref(dias),
+                                            data_ref = data_referencia,
                                             tipo = tipo)
 
 

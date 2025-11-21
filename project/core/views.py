@@ -47,6 +47,10 @@ def data_ref(n):
     data_ref = hoje - d
     return data_ref
 
+# a partir da data de referência, calcula n dias atrás
+def dias_antes_data_ref(data_referencia):
+
+    return (dt.today() - data_referencia).days 
 
 @core.route('/')
 def index():
@@ -68,9 +72,11 @@ def inicio():
     +---------------------------------------------------------------------------------------+
     """
 
-    dias_data_ref = os.environ.get('DIAS_DATA_REF')    
+    # dias_data_ref = os.environ.get('DIAS_DATA_REF') 
+    data_referencia = dt.strptime(os.environ.get('DATA_REFERENCIA')+' 00:00:00','%Y-%m-%d  %H:%M:%S')    
 
-    return render_template ('index.html', data_ref = data_ref(dias_data_ref), dias_data_ref = dias_data_ref)  
+    return render_template ('index.html', data_ref =  dt.strptime(os.environ.get('DATA_REFERENCIA'),'%Y-%m-%d'),
+                                          dias_data_ref = str(dias_antes_data_ref(data_referencia)))  
 
 @core.route('/info')
 def info():
@@ -94,9 +100,13 @@ def data_referencia():
 
     if form.validate_on_submit():
 
-        os.environ["DIAS_DATA_REF"] = str(form.dias_atras.data)
+        # os.environ["DIAS_DATA_REF"] = str(form.dias_atras.data)
+        os.environ["DATA_REFERENCIA"] = str(form.data_referencia.data)
 
-        return render_template('index.html', data_ref = data_ref(form.dias_atras.data), dias_data_ref = str(form.dias_atras.data))
+        data_referencia = dt.strptime(os.environ.get('DATA_REFERENCIA')+' 00:00:00','%Y-%m-%d  %H:%M:%S')
+
+        return render_template('index.html', data_ref =  dt.strptime(os.environ.get('DATA_REFERENCIA'),'%Y-%m-%d'),
+                                             dias_data_ref = str(dias_antes_data_ref(data_referencia)))
     
     return render_template('dias_data_ref.html', form = form)
 

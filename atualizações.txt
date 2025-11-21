@@ -1,5 +1,9 @@
 //# Atualizações ##
 
+21/11/2025
+Recebe data, não mais quantidade de dias, na definição da data de referência para resgate dos dados.
+v1.0.15
+
 25/09/2025
 Correção no csv de unidades.
 v1.0.14
