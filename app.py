@@ -45,5 +45,31 @@ def str_to_dict (valor):
 def str_to_dict (valor):
     return list((ast.literal_eval(valor)).values())[0]
 
+@app.template_filter('safe_percentage')
+def safe_percentage(numerator, denominator, decimal_places=1):
+    """Calcula percentual de forma segura, evitando divisão por zero"""
+    if denominator == 0 or denominator is None:
+        return "N/A"
+    if numerator is None:
+        return "N/A"
+    try:
+        result = (numerator / denominator) * 100
+        return locale.format_string(f'%.{decimal_places}f', round(result, decimal_places), grouping=True)
+    except (TypeError, ValueError, ZeroDivisionError):
+        return "N/A"
+
+@app.template_filter('safe_division')
+def safe_division(numerator, denominator, default="0", decimal_places=2):
+    """Divisão segura com valor padrão configurável"""
+    if denominator == 0 or denominator is None:
+        return default
+    if numerator is None:
+        return default
+    try:
+        result = numerator / denominator
+        return locale.format_string(f'%.{decimal_places}f', round(result, decimal_places), grouping=True)
+    except (TypeError, ValueError, ZeroDivisionError):
+        return default
+
 if __name__ == '__main__':
     app.run(port = 5003)
