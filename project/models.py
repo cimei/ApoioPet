@@ -451,6 +451,10 @@ class Pessoas(db.Model, UserMixin):
     email_verified_at        = db.Column(db.DateTime)
     sexo                     = db.Column(db.String)
     situacao_funcional       = db.Column(db.String)
+    situacao_siape           = db.Column(db.String)
+    data_ativacao_temporaria = db.Column(db.DateTime)
+    justicativa_ativacao_temporaria = db.Column(db.String)
+    usuario_externo          = db.Column(db.Integer)
     config                   = db.Column(db.JSON)
     notificacoes             = db.Column(db.JSON)
     metadados                = db.Column(db.JSON)
@@ -461,12 +465,11 @@ class Pessoas(db.Model, UserMixin):
     data_inicial_pedagio     = db.Column(db.DateTime)
     data_final_pedagio       = db.Column(db.DateTime)
     tipo_pedagio             = db.Column(db.Integer)
-    modalidade_pgd           = db.Column(db.String)
+    nome_jornada             = db.Column(db.String)
+    cod_jornada              = db.Column(db.Integer)
+    # modalidade_pgd           = db.Column(db.String)
+    tipo_modalidade_id       = db.Column(db.String)
     participa_pgd            = db.Column(db.String)
-
-    # nome_jornada             = db.Column(db.String)
-    # cod_jornada              = db.Column(db.Integer)
-    
 
     def __init__(self, id
                      , created_at
@@ -493,6 +496,10 @@ class Pessoas(db.Model, UserMixin):
                      , email_verified_at
                      , sexo
                      , situacao_funcional
+                     , situacao_siape
+                     , data_ativacao_temporaria
+                     , justicativa_ativacao_temporaria
+                     , usuario_externo
                      , config
                      , notificacoes
                      , metadados
@@ -503,7 +510,9 @@ class Pessoas(db.Model, UserMixin):
                      , data_inicial_pedagio
                      , data_final_pedagio
                      , tipo_pedagio
-                     , modalidade_pgd
+                     , nome_jornada
+                     , cod_jornada
+                     , tipo_modalidade_id
                      , participa_pgd):
 
         self.id                       = id
@@ -531,6 +540,10 @@ class Pessoas(db.Model, UserMixin):
         self.email_verified_at        = email_verified_at
         self.sexo                     = sexo
         self.situacao_funcional       = situacao_funcional
+        self.situacao_siape           = situacao_siape
+        self.data_ativacao_temporaria = data_ativacao_temporaria
+        self.justicativa_ativacao_temporaria = justicativa_ativacao_temporaria
+        self.usuario_externo          = usuario_externo
         self.config                   = config
         self.notificacoes             = notificacoes
         self.metadados                = metadados
@@ -541,7 +554,9 @@ class Pessoas(db.Model, UserMixin):
         self.data_inicial_pedagio     = data_inicial_pedagio
         self.data_final_pedagio       = data_final_pedagio
         self.tipo_pedagio             = tipo_pedagio
-        self.modalidade_pgd           = modalidade_pgd
+        self.nome_jornada             = nome_jornada
+        self.cod_jornada              = cod_jornada    
+        self.tipo_modalidade_id       = tipo_modalidade_id
         self.participa_pgd            = participa_pgd
 
     @staticmethod
@@ -617,21 +632,21 @@ class tipos_modalidades_siape(db.Model):
     updated_at          = db.Column(db.DateTime)
     deleted_at          = db.Column(db.DateTime)
     nome                = db.Column(db.String)
-    tipos_modalidade_id = db.Column(db.String)
+    tipo_modalidade_id = db.Column(db.String)
     
     def __init__(self, id    
                      , created_at
                      , updated_at
                      , deleted_at
                      , nome
-                     , tipos_modalidade_id):
+                     , tipo_modalidade_id):
         
         self.id                  = id
         self.created_at          = created_at
         self.updated_at          = updated_at
         self.deleted_at          = deleted_at
         self.nome                = nome
-        self.tipos_modalidade_id = tipos_modalidade_id
+        self.tipo_modalidade_id = tipo_modalidade_id
         
     def __repr__ (self):
             return f"{self.nome}"    
@@ -1296,4 +1311,243 @@ class envio_itens(db.Model):
 
     def __repr__(self):
 
-        return f"{self.uid};{self.tipo};{self.erros}"                              
+        return f"{self.uid};{self.tipo};{self.erros}"     
+
+
+# Unidades SIAPE (integração)
+
+class integracao_unidades(db.Model):
+
+    __tablename__ = 'integracao_unidades'
+    # __table_args__ = {"schema": ""}
+
+    id              = db.Column(db.String, primary_key = True)
+    created_at      = db.Column(db.DateTime)
+    updated_at      = db.Column(db.DateTime)
+    deleted_at      = db.Column(db.DateTime)
+    id_servo                        = db.Column(db.String)
+    pai_servo                       = db.Column(db.String)
+    codigo_siape                    = db.Column(db.String)  # codigo
+    pai_siape                       = db.Column(db.String)
+    codupag                         = db.Column(db.String)
+    nomeuorg                        = db.Column(db.String)  # nome
+    siglauorg                       = db.Column(db.String)  # sigla
+    telefone                        = db.Column(db.String)
+    email                           = db.Column(db.String)
+    natureza                        = db.Column(db.String)
+    fronteira                       = db.Column(db.String)
+    fuso_horario                    = db.Column(db.String)
+    cod_uop                         = db.Column(db.String)
+    cod_unidade                     = db.Column(db.String)
+    tipo                            = db.Column(db.String)
+    tipo_desc                       = db.Column(db.String)
+    na_rodovia                      = db.Column(db.String)
+    logradouro                      = db.Column(db.String)
+    bairro                          = db.Column(db.String)
+    cep                             = db.Column(db.String)
+    ptn_ge_coordenada               = db.Column(db.String)
+    municipio_siafi_siape           = db.Column(db.String)
+    municipio_siscom                = db.Column(db.String)
+    municipio_ibge                  = db.Column(db.String)
+    municipio_nome                  = db.Column(db.String)
+    municipio_uf                    = db.Column(db.String)
+    ativa                           = db.Column(db.String)
+    regimental                      = db.Column(db.String)
+    data_modificacao                = db.Column(db.DateTime)
+    und_nu_adicional                = db.Column(db.String)
+    cnpjupag                        = db.Column(db.String)
+    cpf_titular_autoridade_uorg     = db.Column(db.String)
+    cpf_substituto_autoridade_uorg  = db.Column(db.String)
+
+    def __init__(self, id
+                     , created_at
+                     , updated_at
+                     , deleted_at
+                     , id_servo                        
+                     , pai_servo                       
+                     , codigo_siape                      
+                     , pai_siape                       
+                     , codupag                         
+                     , nomeuorg                          
+                     , siglauorg                         
+                     , telefone                        
+                     , email                           
+                     , natureza                        
+                     , fronteira                       
+                     , fuso_horario                    
+                     , cod_uop                         
+                     , cod_unidade                     
+                     , tipo                            
+                     , tipo_desc                       
+                     , na_rodovia                      
+                     , logradouro                      
+                     , bairro                          
+                     , cep                             
+                     , ptn_ge_coordenada               
+                     , municipio_siafi_siape           
+                     , municipio_siscom                
+                     , municipio_ibge                  
+                     , municipio_nome                  
+                     , municipio_uf                    
+                     , ativa                           
+                     , regimental                      
+                     , data_modificacao     
+                     , und_nu_adicional                
+                     , cnpjupag                        
+                     , cpf_titular_autoridade_uorg     
+                     , cpf_substituto_autoridade_uorg):
+        
+        self.id                 = id
+        self.data_modificacao   = data_modificacao
+        self.created_at         = created_at
+        self.updated_at         = updated_at
+        self.deleted_at         = deleted_at
+        self.id_servo                        = id_servo                        
+        self.pai_servo                       = pai_servo    
+        self.codigo_siape                    = codigo_siape
+        self.pai_siape                       = pai_siape
+        self.codupag                         = codupag
+        self.nomeuorg                        = nomeuorg
+        self.siglauorg                       = siglauorg
+        self.telefone                        = telefone
+        self.email                           = email
+        self.natureza                        = natureza
+        self.fronteira                       = fronteira
+        self.fuso_horario                    = fuso_horario
+        self.cod_uop                         = cod_uop
+        self.cod_unidade                     = cod_unidade
+        self.tipo                            = tipo
+        self.tipo_desc                       = tipo_desc
+        self.na_rodovia                      = na_rodovia
+        self.logradouro                      = logradouro
+        self.bairro                          = bairro
+        self.cep                             = cep
+        self.ptn_ge_coordenada               = ptn_ge_coordenada
+        self.municipio_siafi_siape           = municipio_siafi_siape
+        self.municipio_siscom                = municipio_siscom
+        self.municipio_ibge                  = municipio_ibge
+        self.municipio_nome                  = municipio_nome
+        self.municipio_uf                    = municipio_uf
+        self.ativa                           = ativa
+        self.regimental                      = regimental
+        self.data_modificacao                = data_modificacao
+        self.und_nu_adicional                = und_nu_adicional
+        self.cnpjupag                        = cnpjupag
+        self.cpf_titular_autoridade_uorg     = cpf_titular_autoridade_uorg
+        self.cpf_substituto_autoridade_uorg  = cpf_substituto_autoridade_uorg
+
+
+    def __repr__ (self):
+        return f"{self.codigo_siape};{self.siglauorg};{self.nomeuorg}"
+
+# servidores SIAPE (integração)
+
+class integracao_servidores(db.Model):
+
+    __tablename__ = 'integracao_servidores'
+    # __table_args__ = {"schema": ""}
+    
+    id                       = db.Column(db.String, primary_key = True)
+    created_at               = db.Column(db.DateTime)
+    updated_at               = db.Column(db.DateTime)
+    deleted_at               = db.Column(db.DateTime)
+    cpf_ativo           = db.Column(db.String)
+    data_modificacao    = db.Column(db.DateTime)
+    cpf                 = db.Column(db.String)
+    nome                = db.Column(db.String)
+    emailfuncional      = db.Column(db.String)
+    sexo                = db.Column(db.String)
+    municipio           = db.Column(db.String)
+    uf                  = db.Column(db.String)
+    data_nascimento     = db.Column(db.String)
+    telefone            = db.Column(db.String)
+    vinculo_ativo       = db.Column(db.String)
+    matriculasiape      = db.Column(db.String)
+    codigo_cargo        = db.Column(db.String)
+    coduorgexercicio    = db.Column(db.String)
+    coduorglotacao      = db.Column(db.String)
+    codigo_servo_exercicio  = db.Column(db.String)
+    nomeguerra              = db.Column(db.String)
+    situacao_funcional      = db.Column(db.String)
+    codupag                 = db.Column(db.String)
+    dataexercicionoorgao    = db.Column(db.String)
+    funcoes                 = db.Column(db.String)
+    cpf_chefia_imediata     = db.Column(db.String)
+    email_chefia_imediata   = db.Column(db.String)
+    codigo_situacao_funcional   = db.Column(db.String)
+    nome_jornada                = db.Column(db.String)
+    cod_jornada                 = db.Column(db.Integer)
+    modalidade_pgd              = db.Column(db.String)
+    participa_pgd               = db.Column(db.String)
+    ident_unica                 = db.Column(db.String)
+
+    def __init__(self, id
+                     , created_at
+                     , updated_at
+                     , deleted_at
+                     , cpf_ativo           
+                     , data_modificacao    
+                     , cpf                 
+                     , nome                
+                     , emailfuncional      
+                     , sexo                
+                     , municipio           
+                     , uf                  
+                     , data_nascimento     
+                     , telefone            
+                     , vinculo_ativo       
+                     , matriculasiape      
+                     , codigo_cargo        
+                     , coduorgexercicio    
+                     , coduorglotacao      
+                     , codigo_servo_exercicio  
+                     , nomeguerra              
+                     , situacao_funcional      
+                     , codupag                 
+                     , dataexercicionoorgao    
+                     , funcoes                 
+                     , cpf_chefia_imediata     
+                     , email_chefia_imediata   
+                     , codigo_situacao_funcional   
+                     , nome_jornada                
+                     , cod_jornada  
+                     , modalidade_pgd               
+                     , participa_pgd               
+                     , ident_unica):
+
+        self.id                       = id
+        self.created_at               = created_at
+        self.updated_at               = updated_at
+        self.deleted_at               = deleted_at
+        self.cpf_ativo                = cpf_ativo           
+        self.data_modificacao        = data_modificacao    
+        self.cpf                     = cpf                 
+        self.nome                    = nome                
+        self.emailfuncional          = emailfuncional      
+        self.sexo                    = sexo                
+        self.municipio               = municipio           
+        self.uf                      = uf                  
+        self.data_nascimento         = data_nascimento     
+        self.telefone                = telefone            
+        self.vinculo_ativo           = vinculo_ativo       
+        self.matriculasiape          = matriculasiape      
+        self.codigo_cargo            = codigo_cargo        
+        self.coduorgexercicio        = coduorgexercicio    
+        self.coduorglotacao          = coduorglotacao      
+        self.codigo_servo_exercicio  = codigo_servo_exercicio  
+        self.nomeguerra              = nomeguerra              
+        self.situacao_funcional      = situacao_funcional      
+        self.codupag                 = codupag                 
+        self.dataexercicionoorgao    = dataexercicionoorgao    
+        self.funcoes                 = funcoes                 
+        self.cpf_chefia_imediata     = cpf_chefia_imediata     
+        self.email_chefia_imediata   = email_chefia_imediata   
+        self.codigo_situacao_funcional   = codigo_situacao_funcional    
+        self.nome_jornada                = nome_jornada                
+        self.cod_jornada                 = cod_jornada  
+        self.modalidade_pgd              = modalidade_pgd
+        self.participa_pgd               = participa_pgd
+        self.ident_unica                 = ident_unica
+
+    def __repr__ (self):
+        return f"{self.cpf};{self.nome};{self.matriculasiape}"

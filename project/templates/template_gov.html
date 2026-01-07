@@ -257,6 +257,16 @@
                       </ul>
                     </div>
 
+                    <div class="menu-folder"><a class="menu-item" href="javascript: void(0)"><span class="icon"><i
+                      class="fa fa-magic" aria-hidden="true"></i></span><span class="content">Intervenções</span></a>
+                      <ul>
+                        <li><a class="menu-item divider" href="{{url_for('intervencoes.servidor_unidade')}}"><span
+                            class="icon"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></span><span
+                            class="content">Verificar e atualizar Pessoa</span></a>
+                        </li>     
+                      </ul>
+                    </div>
+
                   {% endif %}
 
                 </nav>
@@ -358,7 +368,7 @@
     <footer class="br-footer pt-3" id="footer">
       <div class="container-lg">
         <div class="info">
-          {% set ver = namespace(num = '1.0.15') %}
+          {% set ver = namespace(num = '1.1.0') %}
           <div class="text-down-01 text-medium pb-3">{{'DB_DATABASE'|verifica_serv_bd}} em
             {{'DB_SERVER'|verifica_serv_bd}} - v. {{ ver.num }} <small>cbt</small>
           </div>

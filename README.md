@@ -75,6 +75,19 @@ PGD Petrvs de sua instituição, me avise que eu irei buscar a correção.
 
  * Números
  * Gráficos
+
+**Intervenções**
+
+ * Verificar e atualizar Pessoa (BETA)
+
+ Esta função deve ser utilizada em último caso, quando as cargas SIAPE do PGD Petrvs não conseguirem equiparar os dados
+ de uma pessoa no SIAPE com o constante na base de dados do sistema.
+ Ao se informar um CPF, são trazidos os dados disponíveis nas tabelas de integração (dados brutos do SIAPE) e os correspondentes
+ nas tabelas usuarios e unidades do sistema.
+ Pode-se então comparar e identificar discrepâncias.
+ Ao se clicar no botão "Ajustar", os dados de e-mail, participação no PGD, modalidade no PGD, lotação e chefia serão atualizados 
+ na base do PGD Petrvs conforme o que estiver estipulado nos dados do SIAPE. Caso a pessoa não exista na base do sistema, será inserida.
+ Use esta função somente após ter tentado a carga invidual do respectivo CPF via PGD Petrvs
  
 **Algumas telas do sistema**
  

@@ -1,5 +1,9 @@
 //# Atualizações ##
 
+07/01/2026
+Atualização de nome de campos conforme a versão 2.9.x do PGD Petrvs.
+Implementada a função "Intervenções" (BETA).
+
 21/11/2025
 Recebe data, não mais quantidade de dias, na definição da data de referência para resgate dos dados.
 v1.0.15
