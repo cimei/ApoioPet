@@ -260,14 +260,28 @@ def ajustar(cpf):
                                     .first()
                 db.session.query(Pessoas)\
                             .filter(Pessoas.id == c_s_p.id)\
-                            .update({'modalidade_pgd': modalidade.id,'updated_at': func.now()})
+                            .update({'tipo_modalidade_id': modalidade.id,'updated_at': func.now()})
+                db.session.commit()
+            elif not c_s_i.modalidade_pgd and c_s_i.participa_pgd == 'sim':
+                modalidade = db.session.query(tipos_modalidades_siape)\
+                                    .filter(tipos_modalidades_siape.nome == 'presencial')\
+                                    .first()
+                db.session.query(Pessoas)\
+                            .filter(Pessoas.id == c_s_p.id)\
+                            .update({'tipo_modalidade_id': modalidade.id,'updated_at': func.now()})
                 db.session.commit()
             else:
                 flash('Modalidade PGD não informada no SIAPE. Ajuste não realizado.','erro')
                 print('Modalidade PGD não informada no SIAPE. Ajuste não realizado.')
-    
-    
-    
+        # se a pesso, conforme o SIAPE, participa do PGD, as a modalidade está nula, coloca como presencial
+        if not c_s_i.modalidade_pgd and c_s_i.participa_pgd == 'sim':
+            modalidade = db.session.query(tipos_modalidades_siape)\
+                                .filter(tipos_modalidades_siape.nome == 'presencial')\
+                                .first()
+            db.session.query(Pessoas)\
+                        .filter(Pessoas.id == c_s_p.id)\
+                        .update({'tipo_modalidade_id': modalidade.id,'updated_at': func.now()}) 
+            db.session.commit()
     else:
         print('Servidor não encontrado na base de produção. Teremos que inserí-lo...')
         # verificar se a unidade de exercício existe na base de produção
@@ -487,7 +501,7 @@ def ajustar(cpf):
                     .update({'perfil_id': perfil_id,'updated_at': func.now()})
         
         # verificar se o servidor é chefe substituto na unidade, se sim, remover essa atribuição
-        db.session.query(unidades_integrantes_atribuicoes.id)\
+        db.session.query(unidades_integrantes_atribuicoes)\
                   .filter(unidades_integrantes_atribuicoes.unidade_integrante_id == c_u_p.unidade_integrante_id,
                           unidades_integrantes_atribuicoes.atribuicao == 'CHEFE_SUBSTITUTO',
                           unidades_integrantes_atribuicoes.deleted_at == None)\

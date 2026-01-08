@@ -1,8 +1,13 @@
 //# Atualizações ##
 
+08/01/2026
+Correção de erros. Hotfix.
+Mantida a tag.
+
 07/01/2026
 Atualização de nome de campos conforme a versão 2.9.x do PGD Petrvs.
-Implementada a função "Intervenções" (BETA).
+Implementada a função "Intervenções". Disponível na aba lateral somente (BETA).
+v1.1.0
 
 21/11/2025
 Recebe data, não mais quantidade de dias, na definição da data de referência para resgate dos dados.
