@@ -87,52 +87,63 @@
         <tr>
           <th scope="row"><p align = "center">Nome</p></th>
           {% if c_s_i.cpf == c_u_i.cpf_titular_autoridade_uorg %}
-            <td><span class="text-danger">{{c_s_i.nome}}</span></td>
+            <td>{{c_s_i.nome}} <i class="fa fa-star text-danger"></i></td>
           {% else %}
             <td>{{c_s_i.nome}}</td>
           {% endif %}
           {% if c_s_g_p and c_s_g_p.unidade_id == c_u_p.unidade_id %}
-            <td><span class="text-danger">{{c_s_p.nome}}</span></td>
+            <td>{{c_s_p.nome}} <i class="fa fa-star text-danger"></i></td>
           {% else %}
             <td>{{c_s_p.nome}}</td>
           {% endif %}
-          <td><p align = "center">{% if c_s_p.nome == c_s_i.nome %}<b><i class="fa-solid fa-check"></i></b>{% else %}<b><i class="fa-solid fa-times text-danger"></i></b>{% endif %}</p></td>
+          <td><p align = "center">
+            {% if c_s_p.nome == c_s_i.nome %}
+              {% if c_s_i.cpf == c_u_i.cpf_titular_autoridade_uorg and not(c_s_g_p and c_s_g_p.unidade_id == c_u_p.unidade_id) %}
+                <b><i class="fa fa-check-circle-o"></i></b>
+              {% else %}
+                <b><i class="fa fa-check"></i></b>
+              {% endif %}
+            {% else %}
+              <b><i class="fa fa-times text-danger"></i></b>
+            {% endif %}
+            </p>
+          </td>
         </tr>
         <tr>
           <th scope="row"><p align = "center">Sexo</p></th>
           <td>{{c_s_i.sexo}}</td>
           <td>{{c_s_p.sexo}}</td>
-          <td><p align = "center">{% if c_s_p.sexo == c_s_i.sexo %}<b><i class="fa-solid fa-check"></i></b>{% else %}<b><i class="fa-solid fa-times text-danger"></i></b>{% endif %}</p></td>
+          <td><p align = "center">{% if c_s_p.sexo == c_s_i.sexo %}<b><i class="fa fa-check"></i></b>{% else %}<b><i class="fa fa-times text-danger"></i></b>{% endif %}</p></td>
         </tr>
         <tr>  
           <th scope="row"><p align = "center">E-mail</p></th>
           <td>{{c_s_i.emailfuncional}}</td>
           <td>{{c_s_p.email}}</td>
-          <td><p align = "center">{% if c_s_p.email == c_s_i.emailfuncional %}<b><i class="fa-solid fa-check"></i></b>{% else %}<b><i class="fa-solid fa-times text-danger"></i></b>{% endif %}</p></td>
+          <td><p align = "center">{% if c_s_p.email == c_s_i.emailfuncional %}<b><i class="fa fa-check"></i></b>{% else %}<b><i class="fa fa-times text-danger"></i></b>{% endif %}</p></td>
         </tr>
         <tr>
           <th scope="row"><p align = "center">Matrícula</p></th>
           <td>{{c_s_i.matriculasiape}}</td>
           <td>{{c_s_p.matricula}}</td>
-          <td><p align = "center">{% if c_s_p.matricula == c_s_i.matriculasiape %}<b><i class="fa-solid fa-check"></i></b>{% else %}<b><i class="fa-solid fa-times text-danger"></i></b>{% endif %}</p></td>
+          <td><p align = "center">{% if c_s_p.matricula == c_s_i.matriculasiape %}<b><i class="fa fa-check"></i></b>{% else %}<b><i class="fa fa-times text-danger"></i></b>{% endif %}</p></td>
         </tr>
         <tr>
           <th scope="row"><p align = "center">PGD</p></th>
           <td>{{c_s_i.participa_pgd}}</td>
           <td>{{c_s_p.participa_pgd}}</td>
-          <td><p align = "center">{% if c_s_p.participa_pgd == c_s_i.participa_pgd %}<b><i class="fa-solid fa-check"></i></b>{% else %}<b><i class="fa-solid fa-times text-danger"></i></b>{% endif %}</p></td>
+          <td><p align = "center">{% if c_s_p.participa_pgd == c_s_i.participa_pgd %}<b><i class="fa fa-check"></i></b>{% else %}<b><i class="fa fa-times text-danger"></i></b>{% endif %}</p></td>
         </tr>
         <tr>
           <th scope="row"><p align = "center">Modal.</p></th>
           <td>{{c_s_i.modalidade_pgd}}</td>
           <td>{{c_s_p.modalidade_pgd}}</td>
-          <td><p align = "center">{% if c_s_p.modalidade_pgd == c_s_i.modalidade_pgd %}<b><i class="fa-solid fa-check"></i></b>{% else %}<b><i class="fa-solid fa-times text-danger"></i></b>{% endif %}</p></td>
+          <td><p align = "center">{% if c_s_p.modalidade_pgd == c_s_i.modalidade_pgd %}<b><i class="fa fa-check"></i></b>{% else %}<b><i class="fa fa-times text-danger"></i></b>{% endif %}</p></td>
         </tr>
         <tr>
           <th scope="row"><p align = "center">Unidade</p></th>
           <td>{{c_s_i.coduorgexercicio}}</td>
           <td>{{c_u_p.codigo}}</td>
-          <td><p align = "center">{% if c_u_p.codigo == c_s_i.coduorgexercicio %}<b><i class="fa-solid fa-check"></i></b>{% else %}<b><i class="fa-solid fa-times text-danger"></i></b>{% endif %}</p></td>
+          <td><p align = "center">{% if c_u_p.codigo == c_s_i.coduorgexercicio %}<b><i class="fa fa-check"></i></b>{% else %}<b><i class="fa fa-times text-danger"></i></b>{% endif %}</p></td>
         </tr>
         <tr>
           <th scope="row"><p align = "center"><b>Dados Unidade</b></p></th>
@@ -141,31 +152,31 @@
           <th scope="row"><p align = "center">Código</p></th>
           <td>{{c_u_i.codigo_siape}}</td>
           <td>{{c_u_p.codigo}}</td>
-          <td><p align = "center">{% if c_u_p.codigo == c_u_i.codigo_siape %}<b><i class="fa-solid fa-check"></i></b>{% else %}<b><i class="fa-solid fa-times text-danger"></i></b>{% endif %}</p></td>
+          <td><p align = "center">{% if c_u_p.codigo == c_u_i.codigo_siape %}<b><i class="fa fa-check"></i></b>{% else %}<b><i class="fa fa-times text-danger"></i></b>{% endif %}</p></td>
         </tr>
         <tr>
           <th scope="row"><p align = "center">Sigla</p></th>
           <td>{{c_u_i.siglauorg}}</td>
           <td>{{c_u_p.sigla}}</td>
-          <td><p align = "center">{% if c_u_p.sigla == c_u_i.siglauorg %}<b><i class="fa-solid fa-check"></i></b>{% else %}<b><i class="fa-solid fa-times text-danger"></i></b>{% endif %}</p></td>
+          <td><p align = "center">{% if c_u_p.sigla == c_u_i.siglauorg %}<b><i class="fa fa-check"></i></b>{% else %}<b><i class="fa fa-times text-danger"></i></b>{% endif %}</p></td>
         </tr>
         <tr>
           <th scope="row"><p align = "center">Nome</p></th>
           <td>{{c_u_i.nomeuorg}}</td>
           <td>{{c_u_p.nome}}</td>
-          <td><p align = "center">{% if c_u_p.nome == c_u_i.nomeuorg %}<b><i class="fa-solid fa-check"></i></b>{% else %}<b><i class="fa-solid fa-times text-danger"></i></b>{% endif %}</p></td>
+          <td><p align = "center">{% if c_u_p.nome == c_u_i.nomeuorg %}<b><i class="fa fa-check"></i></b>{% else %}<b><i class="fa fa-times text-danger"></i></b>{% endif %}</p></td>
         </tr>
         <tr>
           <th scope="row"><p align = "center">Cidade</p></th>
           <td>{{c_u_i.municipio_nome}}</td>
           <td>{{c_u_p.cidade_nome}}</td>
-          <td><p align = "center">{% if c_u_p.cidade_nome == c_u_i.municipio_nome %}<b><i class="fa-solid fa-check"></i></b>{% else %}<b><i class="fa-solid fa-times text-danger"></i></b>{% endif %}</p></td>  
+          <td><p align = "center">{% if c_u_p.cidade_nome == c_u_i.municipio_nome %}<b><i class="fa fa-check"></i></b>{% else %}<b><i class="fa fa-times text-danger"></i></b>{% endif %}</p></td>  
         </tr>
         <tr>
           <th scope="row"><p align = "center">UF</p></th>
           <td>{{c_u_i.municipio_uf}}</td>
           <td>{{c_u_p.cidade_uf}}</td>
-          <td><p align = "center">{% if c_u_p.cidade_uf == c_u_i.municipio_uf %}<b><i class="fa-solid fa-check"></i></b>{% else %}<b><i class="fa-solid fa-times text-danger"></i></b>{% endif %}</p></td>
+          <td><p align = "center">{% if c_u_p.cidade_uf == c_u_i.municipio_uf %}<b><i class="fa fa-check"></i></b>{% else %}<b><i class="fa fa-times text-danger"></i></b>{% endif %}</p></td>
         </tr>
       </tbody>
 

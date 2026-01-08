@@ -196,14 +196,14 @@ def ajustar(cpf):
 
     # Dados da pessoa e unidade em que está lotado produção
     c_s_p = db.session.query(Pessoas.id,
-                            Pessoas.cpf,
-                            Pessoas.nome,
-                            Pessoas.sexo,
-                            Pessoas.email,
-                            Pessoas.matricula,
-                            Pessoas.situacao_funcional,
-                            Pessoas.participa_pgd,
-                            tipos_modalidades_siape.nome.label('modalidade_pgd'))\
+                             Pessoas.cpf,
+                             Pessoas.nome,
+                             Pessoas.sexo,
+                             Pessoas.email,
+                             Pessoas.matricula,
+                             Pessoas.situacao_funcional,
+                             Pessoas.participa_pgd,
+                             tipos_modalidades_siape.nome.label('modalidade_pgd'))\
                         .outerjoin(tipos_modalidades_siape, tipos_modalidades_siape.id == Pessoas.tipo_modalidade_id)\
                         .filter(Pessoas.cpf == cpf_consulta)\
                         .first()
@@ -466,8 +466,9 @@ def ajustar(cpf):
     # Verifica se o servidor é gestor de unidade no Petrvs
     if c_s_p:
         c_s_g_p = db.session.query(Pessoas.id,
-                                unidades_integrantes.unidade_id,
-                                Unidades.codigo.label('unidade_codigo'))\
+                                   unidades_integrantes.unidade_id,
+                                   unidades_integrantes_atribuicoes.unidade_integrante_id, 
+                                   Unidades.codigo.label('unidade_codigo'))\
                             .join(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
                             .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
                             .join(Unidades, Unidades.id == unidades_integrantes.unidade_id)\
@@ -496,6 +497,7 @@ def ajustar(cpf):
                             .filter(perfis.nome == 'Perfil Unidade')\
                             .first()
         perfil_id = perfil.id if perfil else None 
+
         db.session.query(Pessoas)\
                     .filter(Pessoas.id == c_s_p.id)\
                     .update({'perfil_id': perfil_id,'updated_at': func.now()})
@@ -506,6 +508,27 @@ def ajustar(cpf):
                           unidades_integrantes_atribuicoes.atribuicao == 'CHEFE_SUBSTITUTO',
                           unidades_integrantes_atribuicoes.deleted_at == None)\
                   .update({'deleted_at': func.now()})
+        db.session.commit()
+
+    # o servidor não é chefe segundo o SIAPE, mas consta como GESTOR na unidade em produção
+    # vamos deletar o registro de gestor e trocar o perfil unidade para perfil participante
+    if not chefe_unidade and c_s_g_p:
+        # remover a atribuição de GESTOR
+        db.session.query(unidades_integrantes_atribuicoes)\
+                  .filter(unidades_integrantes_atribuicoes.unidade_integrante_id == c_s_g_p.unidade_integrante_id,
+                          unidades_integrantes_atribuicoes.atribuicao == 'GESTOR',
+                          unidades_integrantes_atribuicoes.deleted_at == None)\
+                  .update({'deleted_at': func.now()})
+        # colocar Perfil Participante para a pessoa
+        perfil = db.session.query(perfis)\
+                            .filter(perfis.nome == 'Perfil Participante')\
+                            .first()
+        perfil_id = perfil.id if perfil else None 
+
+        db.session.query(Pessoas)\
+                    .filter(Pessoas.id == c_s_p.id)\
+                    .update({'perfil_id': perfil_id,'updated_at': func.now()})
+        
         db.session.commit()
 
     flash('Ajustes para '+ c_s_i.nome +' ('+ c_s_i.cpf +')'+' realizados na base de produção conforme tabelas de integração.','sucesso')
