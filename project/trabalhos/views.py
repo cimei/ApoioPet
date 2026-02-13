@@ -13,7 +13,7 @@
 
 from flask import render_template, Blueprint, send_from_directory, redirect, url_for
 from flask_login import current_user, login_required
-from sqlalchemy import func, case, literal_column
+from sqlalchemy import func, case, literal_column, distinct
 from sqlalchemy.sql import label
 from sqlalchemy.orm import aliased
 from project import db, app
@@ -236,6 +236,79 @@ def consulta_trabalhos(ptId):
 
     return render_template('consulta_trabalhos.html', trabalhos=trabalhos,
                                                       quantidade = quantidade)
+
+
+## lista todos os trabalhos (atividades) de uma pessoa
+@trabalhos.route('/<pessoaId>/consulta_trabalhos_pessoa')
+@login_required
+def consulta_trabalhos_pessoa(pessoaId):
+    """
+    +---------------------------------------------------------------------------------------+
+    |Lista os trabalhos (atividades) que foram dos plano de trabalho de uma pessoa.         |
+    |                                                                                       |
+    +---------------------------------------------------------------------------------------+
+    """
+
+    pessoa = db.session.query(Pessoas).filter(Pessoas.id == pessoaId).first()
+
+    # subquery que resgata a última avaliação de cada plano_trabalho_consolidacao de uma pessoa
+    avaliacoes_pessoa = db.session.query(avaliacoes.plano_trabalho_consolidacao_id,
+                                         label('data_avaliacao', func.max(avaliacoes.data_avaliacao)),
+                                         avaliacoes.nota,
+                                         avaliacoes.avaliador_id)\
+                                  .filter(avaliacoes.deleted_at == None,
+                                          avaliacoes.plano_trabalho_consolidacao_id != None)\
+                                  .group_by(avaliacoes.plano_trabalho_consolidacao_id,
+                                            avaliacoes.nota,
+                                            avaliacoes.avaliador_id)\
+                                  .subquery()
+
+    # resgata registros em atividades
+    trabalhos = db.session.query(label('a_id',atividades.id),
+                                atividades.descricao,
+                                label('entrega',planos_entregas_entregas.descricao),
+                                atividades.status, 
+                                atividades.carga_horaria,
+                                atividades.progresso,
+                                atividades.data_inicio,
+                                atividades.data_entrega,
+                                label('periodo_pt',
+                                      case((func.coalesce(planos_trabalhos.data_inicio, planos_trabalhos.data_fim) == None,
+                                          'N.I.'),
+                                         (planos_trabalhos.data_inicio == None,
+                                          func.concat('N.I.', literal_column("' a '"),
+                                                  func.date_format(planos_trabalhos.data_fim, '%d/%m/%Y'))),
+                                         (planos_trabalhos.data_fim == None,
+                                          func.concat(func.date_format(planos_trabalhos.data_inicio, '%d/%m/%Y'),
+                                                  literal_column("' a '"), 'N.I.')),
+                                         else_=func.concat(func.date_format(planos_trabalhos.data_inicio, '%d/%m/%Y'),
+                                                     literal_column("' a '"),
+                                                     func.date_format(planos_trabalhos.data_fim, '%d/%m/%Y')))),
+                                avaliacoes_pessoa.c.data_avaliacao,
+                                avaliacoes_pessoa.c.nota,
+                                label('avaliador',Pessoas.nome))\
+                          .filter(atividades.deleted_at == None,
+                                  planos_trabalhos.deleted_at == None,
+                                  planos_trabalhos_consolidacoes.deleted_at == None,
+                                  planos_trabalhos_entregas.deleted_at == None,
+                                  planos_entregas_entregas.deleted_at == None,
+                                  atividades.usuario_id == pessoaId)\
+                          .outerjoin(planos_trabalhos, planos_trabalhos.id == atividades.plano_trabalho_id)\
+                          .outerjoin(planos_trabalhos_consolidacoes, planos_trabalhos_consolidacoes.plano_trabalho_id == planos_trabalhos.id)\
+                          .outerjoin(avaliacoes_pessoa, avaliacoes_pessoa.c.plano_trabalho_consolidacao_id == planos_trabalhos_consolidacoes.id)\
+                          .outerjoin(Pessoas, Pessoas.id == avaliacoes_pessoa.c.avaliador_id)\
+                          .outerjoin(planos_trabalhos_entregas, planos_trabalhos_entregas.id == atividades.plano_trabalho_entrega_id)\
+                          .outerjoin(planos_entregas_entregas, planos_entregas_entregas.id == planos_trabalhos_entregas.plano_entrega_entrega_id)\
+                          .order_by(atividades.data_inicio.desc())\
+                          .distinct()\
+                          .all()
+
+    quantidade = len(trabalhos)    
+
+
+    return render_template('consulta_trabalhos_pessoa.html', trabalhos=trabalhos,
+                                                      quantidade = quantidade,
+                                                      pessoa = pessoa)
 
 
 ## lista avaliações de um plano de trabalho

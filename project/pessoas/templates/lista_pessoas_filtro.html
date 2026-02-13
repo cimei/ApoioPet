@@ -50,6 +50,7 @@
           <col span="1" style="width: 10%;">
           <col span="1" style="width: 10%;">
           <col span="1" style="width: 10%;">
+           <col span="1" style="width: 6%;">
        </colgroup>
 
         <caption>Pessoas</caption>
@@ -64,6 +65,7 @@
             <th scope="col" data-field="situacao_funcional" data-filter-control="input" data-sortable="true"><p align = "center">Situação</p></th>
             <th scope="col" data-field="perfil" data-filter-control="input" data-sortable="true"><p align = "center">Perfil</p></th>
             <th scope="col" data-sortable="true"><p align = "center">PTs</p></th>
+            <th scope="col" data-sortable="false"><p align = "center">Trabs</p></th>
             <th scope="col" data-sortable="true"><p align = "center">Regr.</p></th>
             <th scope="col" data-sortable="true"><p align = "center">PGD SIAPE</p></th>
 
@@ -135,17 +137,26 @@
                 {% if p.qtd_planos_trab == None or p.qtd_planos_trab == 0 %}
                   0
                 {% else %}
-                  <a style="text-decoration: none" href="{{url_for('pessoas.consulta_pts_pessoa',pessoa_id=p.id)}}" class="btn btn-outline-success btn-sm" role="button" aria-pressed="true">
+                  <a style="text-decoration: none; min-width: 42px;" href="{{url_for('pessoas.consulta_pts_pessoa',pessoa_id=p.id)}}" class="btn btn-outline-success btn-sm" role="button" aria-pressed="true">
                     {{p.qtd_planos_trab}}</a>
                 {% endif %}
   
               </p>
             </td>  
+            <td><p align = "center">
+              {% if p.qtd_trabalhos == None or p.qtd_trabalhos == 0 %}
+                0
+              {% else %}
+                <a style="text-decoration: none; min-width: 42px;" href="{{url_for('trabalhos.consulta_trabalhos_pessoa',pessoaId=p.id)}}" class="btn btn-outline-primary btn-sm" role="button" aria-pressed="true" title="Consultar trabalhos da pessoa">
+                  {{p.qtd_trabalhos}}
+                </a>
+              {% endif %}
+            </p></td>
             <td><p align = "center">   
               {% if p.qtd_regramentos == None or p.qtd_regramentos == 0 %}
                 0
               {% else %}
-                <a style="text-decoration: none" href="{{url_for('pessoas.regramentos_pessoa',pessoa_id=p.id)}}" class="btn btn-outline-success btn-sm" role="button" aria-pressed="true">
+                <a style="text-decoration: none; min-width: 42px;" href="{{url_for('pessoas.regramentos_pessoa',pessoa_id=p.id)}}" class="btn btn-outline-success btn-sm" role="button" aria-pressed="true">
                   {{p.qtd_regramentos}}</a>
               {% endif %}
             </p></td>

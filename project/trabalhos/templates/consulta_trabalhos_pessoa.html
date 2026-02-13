@@ -1,0 +1,91 @@
+{% extends "template_gov.html" %}
+{% block content %}
+<div class="container">
+
+  <h4>Trabalhos (atividades) de {{pessoa.nome}}</h4>
+
+  <caption>
+    <div class="row">
+        <div class="col">
+          <p>Lista de <b>{{quantidade}}</b> trabalho(s). </p>
+        </div>
+    </div>
+  </caption>
+
+
+    <table class="table table-striped table-hover table-sm">
+      <caption>Trabalhos</caption>
+      <thead>
+        <tr>
+          <th scope="col"><p align = "center">#</p></th>
+          <th scope="col"><p align = "center">Entrega</p></th>
+          <th scope="col"><p align = "left"><abbr title="Corresponde ao registro de execução">Descrição</abbr></p></th>
+          {# <th scope="col"><p align = "left">C.H.</p></th> #} 
+          <th scope="col"><p align = "center">Status</p></th>
+          <th scope="col"><p align = "center">% progresso</p></th>
+          <th scope="col"><p align = "center">Início</p></th>
+          <th scope="col"><p align = "center">Fim</p></th>
+          <th scope="col"><p align = "center">Período do PT</p></th>
+          <th scope="col"><p align = "center">Nota</p></th>
+          <th scope="col"><p align = "center">Avaliador</p></th>
+        </tr>
+      </thead>
+      <tbody>
+
+        {% for t in trabalhos %}
+
+        <tr>
+          
+          <th scope="row"><p align = "center">{{trabalhos.index(t) + 1}}</p></th>
+          <td><p align = "center"> 
+            {% if t.entrega == None or t.entrega == '' %}
+              Não há
+            {% else %}  
+              {{t.entrega}}
+            {% endif %}   
+          </p></td>
+          <td><p align = "left"> {{t.descricao}} </p></td>
+          {# <td><p align = "center"> {{t.carga_horaria}} </p></td> #}
+          <td><p align = "center"> 
+            {% if t.status == 'INCLUIDO' %}
+              <span class="text-primary">{{t.status}}</span>
+            {% elif t.status == 'CONCLUIDO' %}
+              <span class="text-success">{{t.status}}</span>  
+            {% elif t.status == 'PAUSADO' %}
+              <span class="text-warning">{{t.status}}</span>  
+            {% else %}
+              <span class="text-dark">{{t.status}}</span>
+            {% endif %} </p></td>
+          <td><p align = "center"> {{t.progresso|decimal_com_virgula(1)}} </p></td>
+          <td><p align = "center"> {{t.data_inicio.strftime('%d/%m/%Y')}} </p></td>
+          <td><p align = "center"> {{t.data_entrega.strftime('%d/%m/%Y')}} </p></td>
+          <td><p align = "center"> {{t.periodo_pt}} </p></td>
+          <td><p align = "center"> 
+            {% if t.nota == None or t.nota == '' %}
+              Não há
+            {% else %}  
+              {% if t.nota[0] == '"' %}
+                {{t.nota.split('"')[2][:-1]}}
+              {% else %}
+                {{ t.nota }}
+              {% endif %}
+            {% endif %}
+              </p></td>
+          <td><p align = "center"> 
+            {% if t.avaliador == None or t.avaliador == '' %}
+              Não há
+            {% else %}  
+              {{t.avaliador}}
+            {% endif %}
+              </p></td>
+        </tr>
+
+        {% endfor %}
+
+      </tbody>
+    </table>
+
+
+
+</div>
+{% endblock %}
