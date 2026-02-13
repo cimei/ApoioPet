@@ -68,7 +68,6 @@ def inicio():
     """
     +---------------------------------------------------------------------------------------+
     |Ações quando o aplicativo é colocado no ar.                                            |
-    |Inicia jobs de envio e de reenvio conforme ultimo registro de agendamento no log.      |
     +---------------------------------------------------------------------------------------+
     """
 

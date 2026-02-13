@@ -1,5 +1,9 @@
 //# Atualizações ##
 
+13/02/2026
+Versão do Petrvs aparece no rodapé do template base.
+v1.1.1
+
 08/01/2026
 Correção de erros. Hotfix.
 Mantida a tag.

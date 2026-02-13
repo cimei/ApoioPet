@@ -1551,3 +1551,25 @@ class integracao_servidores(db.Model):
 
     def __repr__ (self):
         return f"{self.cpf};{self.nome};{self.matriculasiape}"
+    
+# migrations (relação de regramentos com pessoas)
+
+class migrations(db.Model):
+
+    __tablename__ = 'migrations'
+    # __table_args__ = {"schema": ""}
+
+    id        = db.Column(db.Integer, primary_key = True)
+    migration = db.Column(db.String)
+    batch     = db.Column(db.Integer)
+
+    def __init__(self, id
+                     , migration
+                     , batch):
+         
+        self.id           = id
+        self.migration    = migration
+        self.batch        = batch
+
+    def __repr__ (self):
+        return f"{self.migration}"

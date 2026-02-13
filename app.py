@@ -1,8 +1,14 @@
 from project import app
+from project import db
 from datetime import datetime as dt
 import os
 import locale
 import ast
+import re
+
+from sqlalchemy import func
+
+from project.models import migrations
 
 from threading import Timer
 
@@ -70,6 +76,23 @@ def safe_division(numerator, denominator, default="0", decimal_places=2):
         return locale.format_string(f'%.{decimal_places}f', round(result, decimal_places), grouping=True)
     except (TypeError, ValueError, ZeroDivisionError):
         return default
+
+@app.context_processor
+def injeta_versao_dados():
+    try:
+        migracao_versao = db.session.query(migrations.migration)\
+                                  .filter(func.lower(migrations.migration).contains('version'))\
+                                  .order_by(migrations.id.desc())\
+                                  .first()
+
+        if migracao_versao and migracao_versao[0]:
+            match = re.search(r'version(.*)$', migracao_versao[0], flags=re.IGNORECASE)
+            if match:
+                return {'versao_dados': match.group(1).lstrip(' _-:') or None}
+    except Exception:
+        pass
+
+    return {'versao_dados': None}
 
 if __name__ == '__main__':
     app.run(port = 5003)

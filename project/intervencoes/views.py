@@ -273,7 +273,7 @@ def ajustar(cpf):
             else:
                 flash('Modalidade PGD não informada no SIAPE. Ajuste não realizado.','erro')
                 print('Modalidade PGD não informada no SIAPE. Ajuste não realizado.')
-        # se a pesso, conforme o SIAPE, participa do PGD, as a modalidade está nula, coloca como presencial
+        # se a pessoa, conforme o SIAPE, participa do PGD, as a modalidade está nula, coloca como presencial
         if not c_s_i.modalidade_pgd and c_s_i.participa_pgd == 'sim':
             modalidade = db.session.query(tipos_modalidades_siape)\
                                 .filter(tipos_modalidades_siape.nome == 'presencial')\
