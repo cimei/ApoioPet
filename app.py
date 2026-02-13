@@ -5,12 +5,18 @@ import os
 import locale
 import ast
 import re
+import logging
 
 from sqlalchemy import func
 
 from project.models import migrations
 
 from threading import Timer
+
+gunicorn_logger = logging.getLogger('gunicorn.error')
+if gunicorn_logger.handlers:
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
 
 # filtros cusomizado para o jinja
 
@@ -77,8 +83,7 @@ def safe_division(numerator, denominator, default="0", decimal_places=2):
     except (TypeError, ValueError, ZeroDivisionError):
         return default
 
-@app.context_processor
-def injeta_versao_dados():
+def obter_versao_dados():
     try:
         migracao_versao = db.session.query(migrations.migration)\
                                   .filter(func.lower(migrations.migration).contains('version'))\
@@ -88,11 +93,19 @@ def injeta_versao_dados():
         if migracao_versao and migracao_versao[0]:
             match = re.search(r'version(.*)$', migracao_versao[0], flags=re.IGNORECASE)
             if match:
-                return {'versao_dados': match.group(1).lstrip(' _-:') or None}
+                return match.group(1).lstrip(' _-:') or None
     except Exception:
-        pass
+        return None
 
-    return {'versao_dados': None}
+    return None
+
+@app.context_processor
+def injeta_versao_dados():
+    return {'versao_dados': obter_versao_dados()}
+
+with app.app_context():
+    versao_dados = obter_versao_dados()
+    app.logger.warning('Versão dos dados do banco (migrations): %s', versao_dados or 'não identificada')
 
 if __name__ == '__main__':
     app.run(port = 5003)
