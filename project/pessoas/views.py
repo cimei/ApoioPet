@@ -91,7 +91,7 @@ def lista_pessoas():
                                 .join(perfis, perfis.id == Pessoas.perfil_id)\
                                 .outerjoin(planos_trabalhos, planos_trabalhos.usuario_id == Pessoas.id)\
                                 .outerjoin(programas_participantes, programas_participantes.usuario_id == Pessoas.id)\
-                                .outerjoin(tipos_modalidades_siape, tipos_modalidades_siape.id == Pessoas.tipo_modalidade_id)\
+                                .outerjoin(tipos_modalidades_siape, tipos_modalidades_siape.tipo_modalidade_id == Pessoas.tipo_modalidade_id)\
                                 .outerjoin(atividades, atividades.plano_trabalho_id == planos_trabalhos.id)\
                                 .filter(Pessoas.deleted_at == None)\
                                 .order_by(Pessoas.nome)\
@@ -127,7 +127,7 @@ def lista_pessoas():
                                 .join(perfis, perfis.id == Pessoas.perfil_id)\
                                 .outerjoin(planos_trabalhos, planos_trabalhos.usuario_id == Pessoas.id)\
                                 .outerjoin(programas_participantes, programas_participantes.usuario_id == Pessoas.id)\
-                                .outerjoin(tipos_modalidades_siape, tipos_modalidades_siape.id == Pessoas.tipo_modalidade_id)\
+                                .outerjoin(tipos_modalidades_siape, tipos_modalidades_siape.tipo_modalidade_id == Pessoas.tipo_modalidade_id)\
                                 .outerjoin(atividades, atividades.plano_trabalho_id == planos_trabalhos.id)\
                                 .filter(Pessoas.deleted_at == None)\
                                 .order_by(Pessoas.nome)\
@@ -275,7 +275,7 @@ def lista_pessoas_filtro():
                                   .join(perfis, perfis.id == Pessoas.perfil_id)\
                                   .outerjoin(planos_trabalhos, planos_trabalhos.usuario_id == Pessoas.id)\
                                   .outerjoin(programas_participantes, programas_participantes.usuario_id == Pessoas.id)\
-                                  .outerjoin(tipos_modalidades_siape, tipos_modalidades_siape.id == Pessoas.tipo_modalidade_id)\
+                                  .outerjoin(tipos_modalidades_siape, tipos_modalidades_siape.tipo_modalidade_id == Pessoas.tipo_modalidade_id)\
                                   .outerjoin(atividades, atividades.plano_trabalho_id == planos_trabalhos.id)\
                                   .filter(Pessoas.deleted_at == None,
                                           Pessoas.nome.like('%'+nome_pesq+'%'),
@@ -351,7 +351,7 @@ def csv_pessoas_filtro(filtro):
                                   .join(perfis, perfis.id == Pessoas.perfil_id)\
                                   .outerjoin(planos_trabalhos, planos_trabalhos.usuario_id == Pessoas.id)\
                                   .outerjoin(programas_participantes, programas_participantes.usuario_id == Pessoas.id)\
-                                  .outerjoin(tipos_modalidades_siape, tipos_modalidades_siape.id == Pessoas.tipo_modalidade_id)\
+                                  .outerjoin(tipos_modalidades_siape, tipos_modalidades_siape.tipo_modalidade_id == Pessoas.tipo_modalidade_id)\
                                   .outerjoin(atividades, atividades.plano_trabalho_id == planos_trabalhos.id)\
                                   .filter(Pessoas.deleted_at == None,
                                           Pessoas.nome.like('%'+filtro[0][1:].split("'")[1]+'%'),
