@@ -1,5 +1,9 @@
 //# Atualizações ##
 
+18/02/2026
+Incluido dados de trabalhos de uma pessoa na lista de pessoas.
+v1.1.2
+
 13/02/2026
 Versão do Petrvs aparece no rodapé do template base.
 v1.1.1
